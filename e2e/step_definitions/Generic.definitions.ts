@@ -32,6 +32,12 @@ Given("I am on {string}", async function(path) {
   const timeLabel = "Configuring the system to be on " + path;
   console.time(timeLabel);
 
+  path = browser.baseUrl + path;
+  const currentUrl = await browser.getCurrentUrl();
+  if (path !== currentUrl) {
+    await browser.get(path);
+  }
+  
   console.timeEnd(timeLabel);
 });
 
