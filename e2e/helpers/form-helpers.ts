@@ -22,14 +22,14 @@ export class Form {
    */
   static async fill(schema: any, timer?: number) {
     timer = Item.checkAndGetTimer(timer);
-    
+
     for (let details of schema) {
-      await browser.sleep(800); //TODO:TOFIX 
+      //await browser.sleep(800); //TODO:TOFIX
       details.el = await GetElement.byID(details.ID, timer);
       switch (details.field) {
         case 'input':
-          Form.clearField(details.el);
-          details.el.sendKeys(details.value);
+          await Form.clearField(details.el);
+          await details.el.sendKeys(details.value);
           break;
         case 'dropdown':
           schema.el = await GetElement.byXPath('//p-dropdown[@id=\"' + details.ID + '\"]//span[@class="ui-dropdown-trigger-icon ui-clickable pi pi-caret-down"]', timer);
@@ -45,10 +45,10 @@ export class Form {
             const listCount = await dropdownList.count();
             dropdownList = await dropdownList.get(Item.randomWholeNumber(1, listCount - 1));
 
-            await dropdownList.click();              
+            await dropdownList.click();
           }
           break;
-          //TODO other fields (Date, etc.)      
+          //TODO other fields (Date, etc.)
       }
     }
   }
@@ -58,12 +58,12 @@ export class Form {
    *
    * @param formName expected name of the form
    * @param formHeader element of the form header
-   * 
+   *
    * @returns a promise that represents the equivalence of the form header with the specified text
    */
   static async compareFormHeader(formName: string, formHeader: ElementFinder) {
     const formHeaderText = await formHeader.getText();
-    
+
     return formName === formHeaderText;
   }
 }

@@ -1,7 +1,14 @@
 import { Given, When, Then } from "cucumber";
-import { browser } from "protractor";
+import { browser, protractor } from "protractor";
 import { ItemForm } from '../hmws/itemForm.hmws';
-import * as Item from '../hmws/items.hmws';
+import { isPending } from "q";
+import { ElementIs } from "../helpers/element-helpers";
+import { GenericPO } from "../po/generic.po";
+import { Form } from "../helpers/form-helpers";
+import { Item } from "../hmws/item.hmws";
+import { HMWSItems } from "../hmws/items.hmws";
+import { GenericHelper } from "../helpers/generic-helpers";
+
 
 // const path = `${browser.params.root}\\e2e\\${browser.params.project}\\items.hmws`;
 // const Item = async () => {
@@ -10,8 +17,12 @@ import * as Item from '../hmws/items.hmws';
 // }
 const baseUrl = browser.baseUrl;
 
+const generic = new GenericPO();
+const EC = protractor.ExpectedConditions;
+
+
 Given("I have an existing {string}", async function(itemName) {
-    const timeLabel = "Checking for existing items for " + itemName; 
+    const timeLabel = "Checking for existing items for " + itemName;
     console.time(timeLabel);
 
     const item = new Item[`${itemName}`]();
@@ -24,8 +35,22 @@ Given("I have an existing {string}", async function(itemName) {
 Given("I go to {string}", async function(path) {
   const timeLabel = "Navigate to " + path;
   console.time(timeLabel);
+  const currentUrl = await browser.getCurrentUrl();
+  path = baseUrl + path;
 
+  if (currentUrl === path) {
+    await browser.refresh();
+    return;
+  }
+
+  await browser.get(path);
   console.timeEnd(timeLabel);
+});
+
+When('I click the {string} button', async function (buttonID) {
+  const button = generic.button(buttonID);
+  await ElementIs.clickable(button);
+  await button.click();
 });
 
 Given("I am on {string}", async function(path) {
@@ -37,7 +62,7 @@ Given("I am on {string}", async function(path) {
   if (path !== currentUrl) {
     await browser.get(path);
   }
-  
+
   console.timeEnd(timeLabel);
 });
 
@@ -71,3 +96,40 @@ Then(
     console.timeEnd("Searching in the table for " + itemName);
   }
 );
+
+When('I {string} a {string} item', async function (action: string, itemType: string) {
+  console.time(`Processing ${action} ${itemType}`);
+  const previousURL = await browser.getCurrentUrl();
+
+  await ElementIs.present(generic.toolbar.get(0));
+  const newButton = generic.button('New');
+  await ElementIs.clickable(newButton);
+  await newButton.click();
+
+  await ElementIs.visible(generic.formHeader);
+  await ElementIs.containingText(generic.formHeader, itemType);
+
+  const itemClass = itemType.replace('\s+', '');
+  const item: Item = new HMWSItems[`${itemClass}`]();
+  await Form.fill(item.buildFormData());
+
+  const okButton = generic.button('OK')
+  await ElementIs.clickable(okButton);
+  await okButton.click();
+
+  await browser.wait(EC.not(EC.urlIs(previousURL)))
+
+  //check database
+
+  console.timeEnd(`Processing ${action} ${itemType}`);
+  // return 'pending';
+});
+
+
+Then('I should see the {string} details of {string}', function (actionDone, itemType) {
+  console.time(`Checking the details of the ${actionDone} ${itemType}`);
+
+
+  console.timeEnd(`Checking the details of the ${actionDone} ${itemType}`);
+  return 'pending';
+});

@@ -13,3 +13,8 @@ Feature: Create an Item
     Scenarios:
         | url              | itemType |
         | "/#/hmws/skills" | "Skill"  |
+
+    # @MachineCRUD @MachineCreate
+    # Scenarios:
+    #     | url                | itemType  |
+    #     | "/#/hmws/machines" | "Machine" |

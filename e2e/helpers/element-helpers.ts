@@ -33,6 +33,34 @@ export class ElementIs {
   }
 
   /**
+   * Retrieves the visibility of the element
+   *
+   * @param el the element being tested
+   * @param timer the time, in milliseconds, for waiting the element to meet the condition
+   */
+  static visible(el: ElementFinder, timer?: number) {
+    timer = Item.checkAndGetTimer(timer);
+    return browser.wait(EC.visibilityOf(el), timer).catch(err => {
+      err = err.toString().split(":");
+      throw "Element " +
+        el.parentElementArrayFinder.locator_ +
+        " is not visible." +
+        err[1];
+    });
+  }
+
+  static containingText(el: ElementFinder, text: string, timer?: number) {
+    timer = Item.checkAndGetTimer(timer);
+    return browser.wait(EC.textToBePresentInElement(el, text), timer).catch(err => {
+      err = err.toString().split(":");
+      throw "Element " +
+        el.parentElementArrayFinder.locator_ +
+        ` does not contain the text ${text}.` +
+        err[1];
+    });
+  }
+
+  /**
    * Retrieves the staleness of the element
    * Recommended to use when looking for an element
    *
@@ -98,7 +126,7 @@ export class GetElement {
    * @param css the css attribute of the element (e.g class, id, tag)
    * @param text the text contained by the css
    * @param timer the time to wait for the element in milliseconds
-   * 
+   *
    * @returns a promise that represents the element with the specified css and its containing text
    */
   static async byCssContainingText(css: string, text: string, timer?: number) {
@@ -114,7 +142,7 @@ export class GetElement {
    *
    * @param className the class name of the element
    * @param timer the time to wait for the element in milliseconds
-   * 
+   *
    * @returns a promise that represents the element with the specified class name
    */
   static async byClassName(className: string, timer?: number) {
@@ -130,7 +158,7 @@ export class GetElement {
    *
    * @param css the css of the element (e.g class, id, tag..)
    * @param timer the time to wait for the element in milliseconds
-   * 
+   *
    * @returns a promise that represents the element with the specified css
    */
 
@@ -164,7 +192,7 @@ export class GetElement {
    * @param el the element
    * @param text the inner text contained by the element
    * @param timer the time to wait for the element in milliseconds
-   * 
+   *
    * @returns a promise representing the element with the exact text
    */
   static async byCSSWithExactText(el: ElementArrayFinder, text: string, timer?: number) {
@@ -176,7 +204,7 @@ export class GetElement {
     for (let index = 0; index < elCount - 1; index++) {
       const elText = await el.get(index).getText();
       if (text === elText) {
-        element = el.get(index);    
+        element = el.get(index);
         break;
       }
     }
@@ -184,7 +212,7 @@ export class GetElement {
     if (!element) {
       throw 'No element found that contains the text: ' + text;
     }
-  
+
     return element;
   }
 
@@ -199,7 +227,7 @@ export class GetElement {
   static async byXPath(XPath: string, timer?: number) {
     timer = Item.checkAndGetTimer(timer);
     const el = element(by.xpath(XPath));
-    
+
     await ElementIs.present(el, timer);
 
     return el;
