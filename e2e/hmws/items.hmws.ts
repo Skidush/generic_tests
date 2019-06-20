@@ -3,66 +3,49 @@ import { ItemList } from './itemList.hmws';
 import { ItemDetails } from './itemDetails.hmws';
 import { ItemToolbar } from './itemToolbar.hmws'
 import { ItemForm, FormField } from './itemForm.hmws';
-import { Schema } from 'inspector';
 import { Item } from './item.hmws';
-
-
-// export class Company extends Item {
-
-//     constructor() {
-//         super(
-//             {
-//                 itemForm: new ItemForm([{
-//                     id: 'name';
-//                 }])
-//             }
-//         );
-//     }
-// }
+import { browser } from 'protractor';
 
 export namespace HMWSItems{
-    export class Skill extends Item {
-
+    export class Company extends Item {
         name: string;
-        description: string;
-
+        longName: string;
+        ABN: string;
+        
         constructor() {
             const formFields: FormField[] = [
                 {ID: 'Name',        field: 'input', key: 'name'},
-                {ID: 'Description', field: 'input', key: 'description'}
+                {ID: 'LongName',    field: 'input', key: 'longName'},
+                {ID: 'ABN',         field: 'input', key: 'ABN'},
             ];
-            super(formFields);
+            super(
+                ['hmws/companies', 'name'],
+                "Companies",
+                formFields, 
+                { 
+                    itemList: new ItemList({
+                        columns: ['Name', 'Long Name', 'ABN', 'Phone', 'Email', 'State'],
+                        orderBy: ['NAME', 'ASC']
+                    })  
+                }
+            );
         }
 
-        testData(index?: number): Skill{
-            const skills = <Skill[]>[
-                {name: 'Fly', description: 'Fly like a bird'},
-                {name: 'Walk', description: 'Walk like a human'}
+        testData(index?: number): Company{
+            const companies = <Company[]>[
+                {name: 'EC', longName: 'Evil Corp', ABN: 'ABN'},
+                {name: 'V2', longName: 'Vaklang 2woh', ABN: 'ABN'}
             ];
-            const num = index | Math.ceil(Math.random() * (skills.length - 1));
-            return skills[num];
+            const num = index | Math.ceil(Math.random() * (companies.length - 1));
+            return companies[num];
+        }
+
+        getUrl(): string {
+            return `${browser.baseUrl}/#/${this.domain}/${encodeURI(this.name)}`;
+        }
+
+        getUrlIdentifier(): string {
+            return this.domainIdentifer;
         }
     }
-
-    // export class Machine extends Item{
-    //     name:string;
-    //     model:string;
-    //     serialNumber:string;
-
-    //     constructor(){
-    //         const formFields: FormField[] = [
-    //             {ID:'Name', field: 'input', key: 'name'}
-    //         ];
-
-    //         super(formFields)
-    //     }
-
-    //     testData(index?: number): Machine {
-    //         const skills = <Machine[]>[
-    //             {name: 'Machine 1', model: 'Robocop', serialNumber: 'RBC-123'}
-    //         ];
-    //         const num = index | Math.ceil(Math.random() * (skills.length - 1));
-    //         return skills[num];
-    //     }
-    // }
 }

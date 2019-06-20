@@ -9,7 +9,7 @@ const _ = require('lodash');
 const fs = require('fs');
 const http = require('request');
 
-export class Item {
+export class ItemHelper {
   /**
    * Checks if a timer has been defined, returns the default timer if not defined
    * @param timer the time to wait
@@ -77,7 +77,7 @@ export class Item {
    * @returns the url of the created item
    */  
   static getItemUrl(itemName: string, itemData: any) {
-    let itemBaseUrl = Item.getItemConfig(itemName).url;
+    let itemBaseUrl = ItemHelper.getItemConfig(itemName).url;
     const url = itemBaseUrl.split('/');
     const urlItemID = url[url.length - 1];
 
@@ -112,9 +112,9 @@ export class Item {
    * @returns the schema of the item with defined values in JSON
    */
   static getFormSchemaWithValues(itemName: string) {
-    const itemValues = Item.getItemValues(itemName);
-    const formSchema = Item.getItemConfig(itemName).schema;
-    return Item.setFormValues(formSchema, itemValues);
+    const itemValues = ItemHelper.getItemValues(itemName);
+    const formSchema = ItemHelper.getItemConfig(itemName).schema;
+    return ItemHelper.setFormValues(formSchema, itemValues);
   }
 
   /**
@@ -152,7 +152,7 @@ export class Application {
    * @returns a promise that represent if the user has been redirected
    */  
   static isRedirected(oldUrl: string, newUrl: string, timer?: number) {
-    timer = Item.checkAndGetTimer(timer);
+    timer = ItemHelper.checkAndGetTimer(timer);
     return browser.wait(EC.urlIs(newUrl), timer).then(() => {
       if (oldUrl === newUrl) {
         return false;

@@ -1,45 +1,44 @@
-import { pgConnection } from "../../configurations/pgCon.conf";
+import { pgConnection } from "../configurations/pgCon.conf";
 
 const pg: pgConnection = new pgConnection();
 
 export class ReportingDB {
   static async getItems(itemName: string, orderBy?: string, limit?: number) {
-    orderBy = orderBy ? '"' + orderBy[0].toUpperCase() + '" ' + orderBy[1] : '"ID" ASC';
+    orderBy = orderBy ? `"${orderBy[0].toUpperCase()}" ${orderBy[1]}` : '"UUID" ASC';
     itemName = itemName.toUpperCase().replace(/\s+/g, "");
 
-    let query = 'SELECT * FROM public."' + itemName + '" ORDER BY ' + orderBy;
-    query = limit ? query + " LIMIT " + limit : query;
+    let query = `SELECT * FROM public."${itemName}" ORDER BY ${orderBy}`;
+    query = limit ? `${query} LIMIT ${limit}` : query;
 
     const results = await pg.query(query);
 
     return results.rows;
   }
 
-  static async getItemTableData(itemName: string, tableConfig: any) {
-    const tableColumns = tableConfig.tableColumns;
-    const orderBy = tableConfig.orderBy;
-    const maxRows = tableConfig.maxRows;
+  static async getSpecificItems(itemName: string, filter?: Array<string>, orderBy?: string, limit?: number) {
+    // orderBy = orderBy ? `"${orderBy[0].toUpperCase()}" ${orderBy[1]}` : '"UUID" ASC';
+    // itemName = itemName.toUpperCase().replace(/\s+/g, "");
 
+    // let query = `SELECT * FROM public."${itemName}" ORDER BY ${orderBy}`;
+    // query = limit ? `${query} LIMIT ${limit}` : query;
+
+    const results = await pg.query(query);
+
+    return results.rows;
+  }
+
+  static async getItemTableData(itemName: string, itemListColumns: Array<String>, state?: string, orderBy?: Array<String>, limit?: number) {
     itemName = itemName.toUpperCase().replace(/\s+/g, "");
+    state = state ? `WHERE "STATE" = '${state}'` : '';
+    (limit as any) = limit ? `LIMIT ${limit}` : '';
     let querySelectors = [];
 
-    tableColumns.forEach(column => {
+    itemListColumns.forEach(column => {
       querySelectors.push('"' + column.toUpperCase().replace(/\s+/g, "") + '"');
     });
 
-    const query =
-      "SELECT " +
-      querySelectors.join(", ") +
-      ' FROM public."' +
-      itemName +
-      '"' +
-      " ORDER BY " +
-      '"' +
-      orderBy[0].toUpperCase() +
-      '" ' +
-      orderBy[1] +
-      " LIMIT " +
-      maxRows;
+    const query = `SELECT ${querySelectors.join(", ")} FROM public."${itemName}" ` +
+      `${state} ORDER BY "${orderBy[0]}" ${orderBy[1]} ${limit}`
     const results = await pg.query(query);
 
     return results.rows;

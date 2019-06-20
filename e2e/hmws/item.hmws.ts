@@ -4,15 +4,26 @@ import { ItemToolbar } from './itemToolbar.hmws'
 import { ItemForm, FormField } from './itemForm.hmws';
 
 export abstract class Item {
-    // list: ItemList;
+    readonly domain: string;
+    readonly domainIdentifer: string;
+    list: ItemList;
     // details: ItemDetails;
     // toolbar: ItemToolbar;
     formFields: FormField[];
+    pluralName: string;
 
-    constructor(formFields: FormField[]){
+    constructor(domainProps: Array<string>, pluralName: string, formFields: FormField[], optional?: {itemList?: ItemList}){
+        this.domain = this.getStandardDomain(domainProps[0]);
+        this.domainIdentifer = domainProps[1];
         this.formFields = formFields;
+        this.pluralName = pluralName;
+        if (optional) {
+            this.list = optional.itemList;
+        }
     }
 
+    abstract getUrl(): string;
+    abstract getUrlIdentifier(): string;
     abstract testData(index?: number): Item;
 
     buildFormData(): FormField[]{
@@ -23,27 +34,17 @@ export abstract class Item {
         return this.formFields;
     }
 
-    // constructor(
-    //     param : {
-    //         itemList?: ItemList,
-    //         itemDetails?: ItemDetails,
-    //         itemToolbar?: ItemToolbar,
-    //         itemForm?: ItemForm
-    // }) {
-    //     if (param.itemDetails) {
-    //         this.details = new ItemDetails();
-    //     }
-
-    //     if (param.itemToolbar) {
-    //         this.toolbar = new ItemToolbar();
-    //     }
-
-    //     if(param.itemForm) {
-    //         this.form = param.itemForm;
-    //     }
-
-    //     if(param.itemList) {
-    //         this.list = param.itemList;
-    //     }
-    // }
+    private getStandardDomain(itemDomain: string): string {
+        const parts = itemDomain.split('/');
+        let result;
+        parts.forEach((part, index) => {
+            if(index === 0) {
+                result = part;
+            }
+            else {
+                result += `/${part}`
+            }
+        });
+        return result;
+    }
 }

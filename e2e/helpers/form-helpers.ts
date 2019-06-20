@@ -1,6 +1,6 @@
 import { by, element, ElementFinder, ElementArrayFinder, protractor, browser } from 'protractor';
 import { GetElement, ElementIs } from './element-helpers';
-import { Item } from './test-helpers';
+import { ItemHelper } from './test-helpers';
 
 export class Form {
   /**
@@ -21,7 +21,7 @@ export class Form {
    * @param timer the time to wait for the form elements in milliseconds
    */
   static async fill(schema: any, timer?: number) {
-    timer = Item.checkAndGetTimer(timer);
+    timer = ItemHelper.checkAndGetTimer(timer);
 
     for (let details of schema) {
       //await browser.sleep(800); //TODO:TOFIX
@@ -43,7 +43,7 @@ export class Form {
             await ElementIs.present(dropdownList.first(), timer);
 
             const listCount = await dropdownList.count();
-            dropdownList = await dropdownList.get(Item.randomWholeNumber(1, listCount - 1));
+            dropdownList = await dropdownList.get(ItemHelper.randomWholeNumber(1, listCount - 1));
 
             await dropdownList.click();
           }
