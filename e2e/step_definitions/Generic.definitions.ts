@@ -99,7 +99,7 @@ Then(
 
 When('I {string} a {string} item', async function (action: string, itemType: string) {
   console.time(`Processing ${action} ${itemType}`);
-  const previousURL = await browser.getCurrentUrl();
+  browser.params['previousURL'] = await browser.getCurrentUrl();
 
   await ElementIs.present(generic.toolbar.get(0));
   const newButton = generic.button('New');
@@ -117,12 +117,7 @@ When('I {string} a {string} item', async function (action: string, itemType: str
   await ElementIs.clickable(okButton);
   await okButton.click();
 
-  await browser.wait(EC.not(EC.urlIs(previousURL)))
-
-  //check database
-
   console.timeEnd(`Processing ${action} ${itemType}`);
-  // return 'pending';
 });
 
 

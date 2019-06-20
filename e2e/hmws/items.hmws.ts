@@ -22,7 +22,6 @@ import { Item } from './item.hmws';
 
 export namespace HMWSItems{
     export class Skill extends Item {
-
         name: string;
         description: string;
 
@@ -31,16 +30,21 @@ export namespace HMWSItems{
                 {ID: 'Name',        field: 'input', key: 'name'},
                 {ID: 'Description', field: 'input', key: 'description'}
             ];
-            super(formFields);
+
+            super('hmws/skills',formFields);
         }
 
-        testData(index?: number): Skill{
+        getTestData(index?: number): Skill{
             const skills = <Skill[]>[
                 {name: 'Fly', description: 'Fly like a bird'},
                 {name: 'Walk', description: 'Walk like a human'}
             ];
             const num = index | Math.ceil(Math.random() * (skills.length - 1));
             return skills[num];
+        }
+
+        getUrl(): string{
+            return `${this.itemDomain}/${name}`
         }
     }
 

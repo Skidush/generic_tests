@@ -7,21 +7,39 @@ export abstract class Item {
     // list: ItemList;
     // details: ItemDetails;
     // toolbar: ItemToolbar;
+    readonly itemDomain: string;
     formFields: FormField[];
 
-    constructor(formFields: FormField[]){
+    constructor(itemDomain: string, formFields: FormField[]){
+        this.itemDomain = this.getStandardDomain(itemDomain);
         this.formFields = formFields;
     }
 
-    abstract testData(index?: number): Item;
+    abstract getTestData(index?: number): Item;
+    abstract getUrl(): string;
 
     buildFormData(): FormField[]{
-        const data = this.testData();
+        const data = this.getTestData();
         this.formFields.forEach((value, index) =>{
             this.formFields[index].value = data[value.key]
         });
         return this.formFields;
     }
+
+    private getStandardDomain(itemDomain: string): string{
+        const parts = itemDomain.split('/');
+        let result;
+        parts.forEach((part,index) => {
+            if(index === 0){
+                result = part;
+            }
+            else{
+                result += `/${part}`
+            }
+        });
+        return result;
+    }
+
 
     // constructor(
     //     param : {
