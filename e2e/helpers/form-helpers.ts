@@ -1,6 +1,6 @@
 import { by, element, ElementFinder, ElementArrayFinder, protractor, browser } from 'protractor';
 import { GetElement, ElementIs } from './element-helpers';
-import { Item } from './test-helpers';
+import { ItemHelpers } from './test-helpers';
 
 export class Form {
   /**
@@ -21,11 +21,12 @@ export class Form {
    * @param timer the time to wait for the form elements in milliseconds
    */
   static async fill(schema: any, timer?: number) {
-    timer = Item.checkAndGetTimer(timer);
-
+    timer = ItemHelpers.checkAndGetTimer(timer);
+    let inputedData = {}
     for (let details of schema) {
       //await browser.sleep(800); //TODO:TOFIX
       details.el = await GetElement.byID(details.ID, timer);
+      inputedData[details.ID] = details.value;
       switch (details.field) {
         case 'input':
           await Form.clearField(details.el);
@@ -34,23 +35,18 @@ export class Form {
         case 'dropdown':
           schema.el = await GetElement.byXPath('//p-dropdown[@id=\"' + details.ID + '\"]//span[@class="ui-dropdown-trigger-icon ui-clickable pi pi-caret-down"]', timer);
           await schema.el.click();
-          if (details.value !== 'random') {
-            const dropdownList = element.all(by.className('ui-dropdown-item'));
-            const dropdownVal = await GetElement.byCSSWithExactText(dropdownList, details.value, timer);
-            await dropdownVal.click();
-          } else {
-            let dropdownList = element.all(by.className('ui-dropdown-item'));
-            await ElementIs.present(dropdownList.first(), timer);
+          let dropdownList = element.all(by.className('ui-dropdown-item'));
+          await ElementIs.present(dropdownList.first(), timer);
 
-            const listCount = await dropdownList.count();
-            dropdownList = await dropdownList.get(Item.randomWholeNumber(1, listCount - 1));
+          const listCount = await dropdownList.count();
+          dropdownList = await dropdownList.get(ItemHelpers.randomWholeNumber(1, listCount - 1));
 
-            await dropdownList.click();
-          }
+          await dropdownList.click();
           break;
           //TODO other fields (Date, etc.)
       }
     }
+    return inputedData;
   }
 
   /**

@@ -7,14 +7,14 @@ Feature: Create an Item
     Scenario Outline: Create an item
         Given I am on <url>
         When I "create" a <itemType> item
-        Then I should see the "created" details of <itemType>
+        Then I should see the "created" details of the <itemType>
 
     @SkillsCRUD @SkillCreate
     Scenarios:
         | url              | itemType |
         | "/#/hmws/skills" | "Skill"  |
 
-    # @MachineCRUD @MachineCreate
-    # Scenarios:
-    #     | url                | itemType  |
-    #     | "/#/hmws/machines" | "Machine" |
+    @MachineCRUD @MachineCreate
+    Scenarios:
+        | url                | itemType  |
+        | "/#/hmws/machines" | "Machine" |
