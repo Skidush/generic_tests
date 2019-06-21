@@ -1,5 +1,6 @@
 // Protractor configuration file, see link for more information
 // https://github.com/angular/protractor/blob/master/lib/config.ts
+const testToRun = '@SkillCreate'
 exports.config = {
   allScriptsTimeout: 11000,
   capabilities: {
@@ -15,7 +16,8 @@ exports.config = {
   baseUrl: 'http://localhost:4200', // Local URL
 
   specs: [
-    './e2e/features/*/GenericRead.feature'
+    './e2e/features/Login.feature',
+    './e2e/features/*/GenericCreate.feature'
   ],
   framework:'custom',
   frameworkPath: require.resolve('protractor-cucumber-framework'),
