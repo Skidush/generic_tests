@@ -16,40 +16,38 @@ export class ReportingDB {
     return results.rows;
   }
 
-  static async getItem(itemType: string, columns?: Array<string>, filters?: Array<string>, state?: string, orderBy?: string, limit?: number) {
+  static async getItem(itemType: string, columns?: Array<String>, filters?: Array<String>, orderBy?: Array<String>, limit?: number) {
     itemType = ItemHelpers.toUpperCaseTrimmed(itemType);
     (columns as any) = columns ? `"${columns.join('", "').toUpperCase().replace(/\s+/g, "")}"` : '*';
-    state = state ? `"STATE" = '${state}'` : '';
 
-    let filter = filters ? `WHERE ${filters.join(' AND ')}` : '';
-    filter = filter !== '' ? `${filter} AND ${state}` : '';
+    const filter = filters ? `WHERE ${filters.join(' AND ')}` : '';
 
-    orderBy = orderBy ? `ORDER BY "${orderBy[0].toUpperCase()}" ${orderBy[1]}`: '';
+    (orderBy as any) = orderBy ? `ORDER BY "${orderBy[0].toUpperCase()}" ${orderBy[1]}`: '';
     (limit as any) = limit ? `LIMIT ${limit}` : ''; 
 
     const query = `SELECT ${columns} FROM public."${itemType}" ${filter} ${orderBy} ${limit}`;
     const results = await pg.query(query);
 
-    return results.rows[0];
+    return results.rows;
   }
 
   //TODO: Merge getItemTableData with getItem
-  static async getItemTableData(itemType: string, itemListColumns: Array<String>, state?: string, orderBy?: Array<String>, limit?: number) {
-    itemType = ItemHelpers.toUpperCaseTrimmed(itemType);
-    state = state ? `WHERE "STATE" = '${state}'` : '';
-    (limit as any) = limit ? `LIMIT ${limit}` : '';
-    let querySelectors = [];
+  // static async getItemTableData(itemType: string, itemListColumns: Array<String>, state?: string, orderBy?: Array<String>, limit?: number) {
+  //   itemType = ItemHelpers.toUpperCaseTrimmed(itemType);
+  //   state = state ? `WHERE "STATE" = '${state}'` : '';
+  //   (limit as any) = limit ? `LIMIT ${limit}` : '';
+  //   let querySelectors = [];
 
-    itemListColumns.forEach(column => {
-      querySelectors.push('"' + ItemHelpers.toUpperCaseTrimmed(column.toString()) + '"');
-    });
+  //   itemListColumns.forEach(column => {
+  //     querySelectors.push('"' + ItemHelpers.toUpperCaseTrimmed(column.toString()) + '"');
+  //   });
 
-    const query = `SELECT ${querySelectors.join(", ")} FROM public."${itemType}" ` +
-      `${state} ORDER BY "${orderBy[0]}" ${orderBy[1]} ${limit}`
-    const results = await pg.query(query);
+  //   const query = `SELECT ${querySelectors.join(", ")} FROM public."${itemType}" ` +
+  //     `${state} ORDER BY "${orderBy[0]}" ${orderBy[1]} ${limit}`
+  //   const results = await pg.query(query);
 
-    return results.rows;
-  }
+  //   return results.rows;
+  // }
 
   static async getItemIDs(itemType: string, createdItemDetails: any) {
     itemType = ItemHelpers.toUpperCaseTrimmed(itemType);

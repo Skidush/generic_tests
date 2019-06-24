@@ -15,9 +15,8 @@ Before((scenario) => {
 });
 
 After(() => {
-    // browser.params.selectedFilter = [];
-    // browser.params.createdItemDetails = {};
-    // browser.params.editedItemDetails = {};
+    // Reset to default
+    browser.params.itemDetails = {};
     //TODO Clean up of created items in the reporting DB and cristal
     console.timeEnd('\nScenario done in');
     console.log('===============================================================');

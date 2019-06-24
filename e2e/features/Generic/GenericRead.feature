@@ -8,40 +8,40 @@ Feature: Read an Item
         Given I have an existing <itemType>
             And I am on <itemUrl>
         When The <itemType> table has loaded
-        Then I should <view> the details of the <itemTypePlural> in the table
+        Then I should "see" the details of the <itemTypePlural> in the table
 
     @CompanyCRUD @ReadCompanyFromTable
     Scenarios:
-        | itemType  | itemUrl              | view  | itemTypePlural |
-        | "Company" | "/#/hmws/companies"  | "see" | "Companies"    |
+        | itemType  | itemUrl              | itemTypePlural |
+        | "Company" | "/#/hmws/companies"  | "Companies"    |
 
     @SkillCRUD @ReadSkillFromTable
     Scenarios:
-        | itemType  | itemUrl              | view  | itemTypePlural |
-        | "Skill"   | "/#/hmws/skills"     | "see" | "Skills"       |
+        | itemType  | itemUrl              | itemTypePlural |
+        | "Skill"   | "/#/hmws/skills"     | "Skills"       |
 
     @MachineCRUD @ReadMachineFromTable
     Scenarios:
-        | itemType  | itemUrl              | view  | itemTypePlural |
-        | "Machine" | "/#/hmws/machines"   | "see" | "Machines"     |
+        | itemType  | itemUrl              | itemTypePlural |
+        | "Machine" | "/#/hmws/machines"   | "Machines"     |
     
     @GenericReadFromDetails
     Scenario Outline: Read <itemType> from the details page
         Given I have an existing <itemType>
         When I navigate to a/an <itemType> details page
-        Then I should see the <action> details of the <itemType>
+        Then I should see the "selected" details of the <itemType>
 
     @CompanyCRUD @ReadCompanyFromDetails
     Scenarios:
-        | itemType  | itemUrl              | action       |
-        | "Company" | "/#/hmws/companies"  | "selected"   |
+        | itemType  | itemUrl              |
+        | "Company" | "/#/hmws/companies"  |
 
     @SkillCRUD @ReadSkillFromDetails
     Scenarios:
-        | itemType  | itemUrl              | action       |
-        | "Skill"   | "/#/hmws/skills"     | "selected"   |
+        | itemType  | itemUrl              |
+        | "Skill"   | "/#/hmws/skills"     |
 
     @MachineCRUD @ReadMachineFromDetails
     Scenarios:
-        | itemType  | itemUrl              | action       |
-        | "Machine" | "/#/hmws/machines"   | "selected"   |
+        | itemType  | itemUrl              |
+        | "Machine" | "/#/hmws/machines"   |

@@ -21,6 +21,10 @@ export class ItemListPO {
     }
 
     static getRadioButton() {
-        return element(by.className('RadioButton'));
+        return GetElement.byClassName('RadioButton');
+    }
+
+    static getTableSpinner() {
+        return GetElement.byClassName('ui-table-loading');
     }
 }

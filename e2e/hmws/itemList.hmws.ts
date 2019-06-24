@@ -7,7 +7,7 @@ export class ItemList {
     columns: Array<String>;
     orderBy: Array<String>
     selectedColumns: Array<String>;
-    selector: String;
+    selector: string;
     pageRows: number;
 
     constructor(params: {
@@ -19,8 +19,8 @@ export class ItemList {
         }) {
         this.columns = params.columns;
         this.orderBy = params.orderBy
+        this.selector = params.selector;
         this.pageRows = 40;
-        
         this.selectedColumns = params.selectedColumns;
     }
 }

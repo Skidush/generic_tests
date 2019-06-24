@@ -6,11 +6,21 @@ Feature: Delete an Item
     @GenericDelete
     Scenario Outline: Delete an item
         Given I have an existing <itemType>
-            And I am on the item list of <itemTypes>
-        When I <action> a <itemType> item
-        Then the <itemType> should be deleted
+            And I am on <itemUrl>
+        When I "delete" a/an <itemType> item
+        Then I should "not see" the details of the <itemTypePlural> in the table
 
-    @SkillsCRUD @SkillDelete
+    @CompanyCRUD @CompanyDelete
     Scenarios:
-        | url              | itemType | itemTypes |
-        | "/#/hmws/skills" | "Skill"  | "Skills"  |
+        | itemUrl                 | itemType   | itemTypePlural |
+        | "/#/hmws/companies"     | "Company"  | "Companies"    |
+
+    @SkillCRUD @SkillDelete
+    Scenarios:
+        | itemUrl                 | itemType   | itemTypePlural |
+        | "/#/hmws/skills"        | "Skill"    | "Skills"       |
+
+    @MachineCRUD @MachineDelete
+    Scenarios:
+        | itemUrl                 | itemType   | itemTypePlural |
+        | "/#/hmws/machines"      | "Machine"  | "Machines"     |

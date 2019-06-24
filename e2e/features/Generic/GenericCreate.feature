@@ -6,7 +6,7 @@ Feature: Create an Item
     @GenericCreate
     Scenario Outline: Create a/an <itemType>
         Given I am on <url>
-        When I "create" a <itemType> item
+        When I "create" a/an <itemType> item
         Then I should see the "created" details of the <itemType>
 
     @SkillCRUD @SkillCreate
