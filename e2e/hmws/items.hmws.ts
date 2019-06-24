@@ -18,25 +18,31 @@ export namespace HMWSItems{
                 {ID: 'LongName',    field: 'input', key: 'longName'},
                 {ID: 'ABN',         field: 'input', key: 'ABN'},
             ];
+
+            const itemList = new ItemList({
+                columns: ['Name', 'Long Name', 'ABN', 'Phone', 'Email', 'State'],
+                orderBy: ['NAME', 'ASC'],
+                selector: tableSelector.RADIOBUTTON
+            });
+
+            const itemDetails = new ItemDetails({
+                outcome: {
+                    Name: outcome.FIELD,
+                    'Long Name': outcome.FIELD,
+                    ABN: outcome.FIELD,
+                    Phone: outcome.TABLE,
+                    Email: outcome.TABLE
+                }
+            });
+
             super(
-                ['hmws/companies', 'name'],
+                'hmws/companies',
+                'name',
                 "Companies",
                 formFields, 
                 { 
-                    itemList: new ItemList({
-                        columns: ['Name', 'Long Name', 'ABN', 'Phone', 'Email', 'State'],
-                        orderBy: ['NAME', 'ASC'],
-                        selector: tableSelector.RADIOBUTTON
-                    }),
-                    itemDetails: new ItemDetails({
-                        outcome: {
-                            Name: outcome.FIELD,
-                            'Long Name': outcome.FIELD,
-                            ABN: outcome.FIELD,
-                            Phone: outcome.TABLE,
-                            Email: outcome.TABLE
-                        }
-                    })
+                    itemList: itemList,
+                    itemDetails: itemDetails
                 }
             );
         }

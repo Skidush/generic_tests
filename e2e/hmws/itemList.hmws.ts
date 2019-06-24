@@ -8,7 +8,6 @@ export class ItemList {
     orderBy: Array<String>
     selectedColumns: Array<String>;
     selector: String;
-    filters: object;
     pageRows: number;
 
     constructor(params: {
@@ -23,6 +22,5 @@ export class ItemList {
         this.pageRows = 40;
         
         this.selectedColumns = params.selectedColumns;
-        this.filters = params.filters;
     }
 }

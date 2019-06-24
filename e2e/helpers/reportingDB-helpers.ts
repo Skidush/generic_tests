@@ -30,8 +30,6 @@ export class ReportingDB {
     const query = `SELECT ${columns} FROM public."${itemType}" ${filter} ${orderBy} ${limit}`;
     const results = await pg.query(query);
 
-    console.log(query);
-
     return results.rows[0];
   }
 

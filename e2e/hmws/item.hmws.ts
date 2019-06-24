@@ -12,16 +12,16 @@ export abstract class Item {
     formFields: FormField[];
     pluralName: string;
 
-    constructor(domainProps: Array<string>, pluralName: string, formFields: FormField[],
+    constructor(domain: string, domainIdentifier: string, pluralName: string, formFields: FormField[],
         optional?: {
             itemList?: ItemList,
             itemDetails?: ItemDetails
         }){
-        this.domain = this.getStandardDomain(domainProps[0]);
-        this.domainIdentifer = domainProps[1];
+        this.domain = this.getStandardDomain(domain);
+        this.domainIdentifer = domainIdentifier;
         this.formFields = formFields;
         this.pluralName = pluralName;
-        
+
         if (optional) {
             this.list = optional.itemList;
             this.details = optional.itemDetails;
