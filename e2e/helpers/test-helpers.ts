@@ -33,110 +33,14 @@ export class ItemHelper {
   }
 
   /**
-   * Sets the values of the form schema from the form values data
+   * Transforms the string into uppercase with no spaces
    *
-   * @param formSchema the schema for the form of the item
-   * @param formValues the values for each of the element of the form
+   * @param string the string to be transformed
    * 
-   * @returns the form schema with set values
-   */    
-  static setFormValues(formSchema: Array<any>, formValues: Array<any>) {
-    const randIndex = Math.floor(Math.random() * formValues.length);
-    for (let formField of formSchema) {  
-        let valueKey;
-        Object.keys(formField).forEach(key => {
-          valueKey = Object.keys(formValues[randIndex]).find((keys) => keys.toUpperCase() === formField[key].toUpperCase());
-
-          if (valueKey !== undefined) {
-            formField['value'] = formValues[randIndex][valueKey];
-          }
-        });
-    }
-    return formSchema;
-  }
-
-  /**
-   * Retrieves the values of the item
-   *
-   * @param itemName the name of the item
-   * 
-   * @returns the values of the item in JSON
-   */  
-  static getItemValues(itemName: string) {
-    const rawData = fs.readFileSync(root + '/data/' + itemName + '/values.td.json');
-    const values = JSON.parse(rawData);
-    return values[itemName];
-  }
-
-  /**
-   * Retrieves the url of the created item
-   *
-   * @param itemName the name of the item
-   * @param itemData the data of the created item
-   * 
-   * @returns the url of the created item
-   */  
-  static getItemUrl(itemName: string, itemData: any) {
-    let itemBaseUrl = ItemHelper.getItemConfig(itemName).url;
-    const url = itemBaseUrl.split('/');
-    const urlItemID = url[url.length - 1];
-
-    switch (urlItemID) {
-      case '{name}':
-        itemBaseUrl = itemBaseUrl.replace('{name}', itemData['Name']);
-        break;
-      case '{ID}':
-        itemBaseUrl = itemBaseUrl.replace('{ID}', itemData['ID']);
-    }
-
-    return itemBaseUrl;
-  }
-
-  /**
-   * Retrieves the configuration of the item
-   *
-   * @param itemName the name of the item
-   * 
-   * @returns the configuration of the item in JSON
-   */  
-  static getItemConfig(itemName: string) {
-    const rawData = fs.readFileSync(root + '/data/' + itemName + '/itemConfiguration.json');
-    return JSON.parse(rawData);
-  }
-
-  /**
-   * Retrieves the schema of the item with defined values
-   * 
-   * @param itemName the name of the item
-   * 
-   * @returns the schema of the item with defined values in JSON
+   * @returns a string transformed to uppercase with no spaces
    */
-  static getFormSchemaWithValues(itemName: string) {
-    const itemValues = ItemHelper.getItemValues(itemName);
-    const formSchema = ItemHelper.getItemConfig(itemName).schema;
-    return ItemHelper.setFormValues(formSchema, itemValues);
-  }
-
-  /**
-   * Parses the schema with defined values into a user readable JSON
-   * 
-   * @param formSchemaWithValues the schema with values of the item
-   * 
-   * @returns the values of the item in JSON with the corresponding IDs as keys
-   */
-  static getRawValues(formSchemaWithValues: any) {
-    let itemValues = {};
-    for (const entry of formSchemaWithValues) {
-      let itemValueKey;
-      Object.keys(entry).forEach(key => {
-        if (key === "ID") {
-          itemValueKey = _.startCase(entry[key]);
-        } else if (itemValueKey && key === "value") {
-          itemValues[itemValueKey] = entry[key];
-        }
-      });
-    }
-    return itemValues;
+  static toUpperCaseTrimmed(string: string) {
+    return string.replace(/\s+/g, "").toUpperCase();
   }
 }
 

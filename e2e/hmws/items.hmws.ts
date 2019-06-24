@@ -1,6 +1,6 @@
 
-import { ItemList } from './itemList.hmws';
-import { ItemDetails } from './itemDetails.hmws';
+import { ItemList, tableSelector } from './itemList.hmws';
+import { ItemDetails, outcome } from './itemDetails.hmws';
 import { ItemToolbar } from './itemToolbar.hmws'
 import { ItemForm, FormField } from './itemForm.hmws';
 import { Item } from './item.hmws';
@@ -25,8 +25,18 @@ export namespace HMWSItems{
                 { 
                     itemList: new ItemList({
                         columns: ['Name', 'Long Name', 'ABN', 'Phone', 'Email', 'State'],
-                        orderBy: ['NAME', 'ASC']
-                    })  
+                        orderBy: ['NAME', 'ASC'],
+                        selector: tableSelector.RADIOBUTTON
+                    }),
+                    itemDetails: new ItemDetails({
+                        outcome: {
+                            Name: outcome.FIELD,
+                            'Long Name': outcome.FIELD,
+                            ABN: outcome.FIELD,
+                            Phone: outcome.TABLE,
+                            Email: outcome.TABLE
+                        }
+                    })
                 }
             );
         }

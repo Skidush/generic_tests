@@ -30,100 +30,100 @@ export class GenericHelper {
     return Object.keys(itemNames).find(key => itemNames[key] === itemNamePlural);
   }
 
-  static async createItem(itemName: string) {
-    const formSchemaWithValues = ItemHelper.getFormSchemaWithValues(itemName);
-    const rawItemValues = ItemHelper.getRawValues(formSchemaWithValues);
+  // static async createItem(itemName: string) {
+  //   const formSchemaWithValues = ItemHelper.getFormSchemaWithValues(itemName);
+  //   const rawItemValues = ItemHelper.getRawValues(formSchemaWithValues);
     
-    const newButton = await ToolbarPO.getNewButton();
-    await newButton.click();
+  //   const newButton = await ToolbarPO.getNewButton();
+  //   await newButton.click();
     
-    const formPanel = await FormPO.getFormPanel();
-    let formHeader = await FormPO.getFormName();
+  //   const formPanel = await FormPO.getFormPanel();
+  //   let formHeader = await FormPO.getFormName();
     
-    // Anti-pattern: Tests should only fail for a single reason. 
-    // Create a separate test for form checking
-    const correctForm = await Form.compareFormHeader("New " + itemName, formHeader);
-    if (!correctForm) {
-      throw 'The create form for - ' + itemName + ' was not displayed, the form - ' + formHeader + ' was shown instead';
-    }
+  //   // Anti-pattern: Tests should only fail for a single reason. 
+  //   // Create a separate test for form checking
+  //   const correctForm = await Form.compareFormHeader("New " + itemName, formHeader);
+  //   if (!correctForm) {
+  //     throw 'The create form for - ' + itemName + ' was not displayed, the form - ' + formHeader + ' was shown instead';
+  //   }
     
-    await Form.fill(formSchemaWithValues);
+  //   await Form.fill(formSchemaWithValues);
     
-    const submitButton = await FormPO.getOkButton();
-    await submitButton.click();
+  //   const submitButton = await FormPO.getOkButton();
+  //   await submitButton.click();
     
-    await ElementIs.stale(formPanel);
+  //   await ElementIs.stale(formPanel);
 
-    browser.params.createdItemDetails[itemName] = rawItemValues;
-  }
+  //   browser.params.createdItemDetails[itemName] = rawItemValues;
+  // }
 
-  static async editItem(itemName: string) {
-    const formSchemaWithValues = ItemHelper.getFormSchemaWithValues(itemName);
-    const rawItemValues = ItemHelper.getRawValues(formSchemaWithValues);
+  // static async editItem(itemName: string) {
+  //   const formSchemaWithValues = ItemHelper.getFormSchemaWithValues(itemName);
+  //   const rawItemValues = ItemHelper.getRawValues(formSchemaWithValues);
 
-    const tableConfig = ItemHelper.getItemConfig(itemName).tableConfig;
+  //   const tableConfig = ItemHelper.getItemConfig(itemName).tableConfig;
 
-    let randomItem: any = await ReportingDB.getItemTableData(itemName, tableConfig);
+  //   let randomItem: any = await ReportingDB.getItemTableData(itemName, tableConfig);
 
-    const randomIndex = ItemHelper.randomWholeNumber(0, randomItem.length - 1);
+  //   const randomIndex = ItemHelper.randomWholeNumber(0, randomItem.length - 1);
     
-    randomItem = randomItem[randomIndex];
+  //   randomItem = randomItem[randomIndex];
 
-    await ElementIs.present(ItemListPO.getTableRows().get(randomIndex));
-    const tableRows = await ItemListPO.getTableRows().get(randomIndex);
-    const radioButton = await tableRows.element(by.css('.RadioButton span'));
-    await radioButton.click();
+  //   await ElementIs.present(ItemListPO.getTableRows().get(randomIndex));
+  //   const tableRows = await ItemListPO.getTableRows().get(randomIndex);
+  //   const radioButton = await tableRows.element(by.css('.RadioButton span'));
+  //   await radioButton.click();
 
-    const editButton = await ToolbarPO.getEditButton();
-    await editButton.click();
+  //   const editButton = await ToolbarPO.getEditButton();
+  //   await editButton.click();
 
-    const formPanel = await FormPO.getFormPanel();
-    let formHeader = await FormPO.getFormName();
+  //   const formPanel = await FormPO.getFormPanel();
+  //   let formHeader = await FormPO.getFormName();
 
-    // Anti-pattern: Tests should only fail for a single reason. 
-    // Create a separate test for form checking
-    const correctForm = await Form.compareFormHeader(itemName + ': Update', formHeader);
-    if (!correctForm) {
-      throw 'The edit form for - ' + itemName + ' was not displayed, the form - ' + formHeader + ' was shown instead';
-    }
+  //   // Anti-pattern: Tests should only fail for a single reason. 
+  //   // Create a separate test for form checking
+  //   const correctForm = await Form.compareFormHeader(itemName + ': Update', formHeader);
+  //   if (!correctForm) {
+  //     throw 'The edit form for - ' + itemName + ' was not displayed, the form - ' + formHeader + ' was shown instead';
+  //   }
 
-    await Form.fill(formSchemaWithValues);
+  //   await Form.fill(formSchemaWithValues);
 
-    const submitButton = await FormPO.getOkButton();
-    await submitButton.click();
+  //   const submitButton = await FormPO.getOkButton();
+  //   await submitButton.click();
     
-    await ElementIs.stale(formPanel);
+  //   await ElementIs.stale(formPanel);
 
-    browser.params.editedItemDetails[itemName] = rawItemValues;
-  }
+  //   browser.params.editedItemDetails[itemName] = rawItemValues;
+  // }
 
-  static async deleteItem(itemName: string) {
-    const tableConfig = ItemHelper.getItemConfig(itemName).tableConfig;
+  // static async deleteItem(itemName: string) {
+  //   const tableConfig = ItemHelper.getItemConfig(itemName).tableConfig;
 
-    let randomItem: any = await ReportingDB.getItemTableData(itemName, tableConfig);
+  //   let randomItem: any = await ReportingDB.getItemTableData(itemName, tableConfig);
 
-    const randomIndex = ItemHelper.randomWholeNumber(0, randomItem.length - 1);
+  //   const randomIndex = ItemHelper.randomWholeNumber(0, randomItem.length - 1);
     
-    randomItem = randomItem[randomIndex];
+  //   randomItem = randomItem[randomIndex];
 
-    await ElementIs.present(ItemListPO.getTableRows().get(randomIndex));
-    const tableRows = await ItemListPO.getTableRows().get(randomIndex);
-    const radioButton = await tableRows.element(by.css('.RadioButton span'));
-    await radioButton.click();
+  //   await ElementIs.present(ItemListPO.getTableRows().get(randomIndex));
+  //   const tableRows = await ItemListPO.getTableRows().get(randomIndex);
+  //   const radioButton = await tableRows.element(by.css('.RadioButton span'));
+  //   await radioButton.click();
 
-    const deleteButton = await ToolbarPO.getDeleteButton();
-    await deleteButton.click();
+  //   const deleteButton = await ToolbarPO.getDeleteButton();
+  //   await deleteButton.click();
 
-    const dialog = await ToolbarPO.getDialog();
-    const yesDialogButton = await ToolbarPO.getDialogYesButton();
-    await yesDialogButton.click();
+  //   const dialog = await ToolbarPO.getDialog();
+  //   const yesDialogButton = await ToolbarPO.getDialogYesButton();
+  //   await yesDialogButton.click();
 
-    await ElementIs.stale(dialog);
-  }
+  //   await ElementIs.stale(dialog);
+  // }
 
-  static async appendItemIDs(itemName: string, rawItemValues: string) {
-    const itemValues = await ReportingDB.getItemIDs(itemName, rawItemValues);
-    return Object.assign(itemValues, rawItemValues);
-  }
+  // static async appendItemIDs(itemName: string, rawItemValues: string) {
+  //   const itemValues = await ReportingDB.getItemIDs(itemName, rawItemValues);
+  //   return Object.assign(itemValues, rawItemValues);
+  // }
 
 }

@@ -1,13 +1,14 @@
 import { pgConnection } from "../configurations/pgCon.conf";
+import { ItemHelper } from "./test-helpers";
 
 const pg: pgConnection = new pgConnection();
 
 export class ReportingDB {
-  static async getItems(itemName: string, orderBy?: string, limit?: number) {
-    orderBy = orderBy ? `"${orderBy[0].toUpperCase()}" ${orderBy[1]}` : '"UUID" ASC';
-    itemName = itemName.toUpperCase().replace(/\s+/g, "");
+  static async getItems(itemType: string, orderBy?: string, limit?: number) {
+    orderBy = orderBy ? `ORDER BY "${orderBy[0].toUpperCase()}" ${orderBy[1]}` : '';
+    itemType = ItemHelper.toUpperCaseTrimmed(itemType);
 
-    let query = `SELECT * FROM public."${itemName}" ORDER BY ${orderBy}`;
+    let query = `SELECT * FROM public."${itemType}" ${orderBy}`;
     query = limit ? `${query} LIMIT ${limit}` : query;
 
     const results = await pg.query(query);
@@ -15,45 +16,53 @@ export class ReportingDB {
     return results.rows;
   }
 
-  static async getSpecificItems(itemName: string, filter?: Array<string>, orderBy?: string, limit?: number) {
-    // orderBy = orderBy ? `"${orderBy[0].toUpperCase()}" ${orderBy[1]}` : '"UUID" ASC';
-    // itemName = itemName.toUpperCase().replace(/\s+/g, "");
+  static async getItem(itemType: string, columns?: Array<string>, filters?: Array<string>, state?: string, orderBy?: string, limit?: number) {
+    itemType = ItemHelper.toUpperCaseTrimmed(itemType);
+    (columns as any) = columns ? `"${columns.join('", "').toUpperCase().replace(/\s+/g, "")}"` : '*';
+    state = state ? `"STATE" = '${state}'` : '';
 
-    // let query = `SELECT * FROM public."${itemName}" ORDER BY ${orderBy}`;
-    // query = limit ? `${query} LIMIT ${limit}` : query;
+    let filter = filters ? `WHERE ${filters.join(' AND ').toUpperCase()}` : '';
+    filter = filter !== '' ? `${filter} AND ${state}` : '';
 
+    orderBy = orderBy ? `ORDER BY "${orderBy[0].toUpperCase()}" ${orderBy[1]}`: '';
+    (limit as any) = limit ? `LIMIT ${limit}` : ''; 
+
+    const query = `SELECT ${columns} FROM public."${itemType}" ${filter} ${orderBy} ${limit}`;
     const results = await pg.query(query);
 
-    return results.rows;
+    console.log(query);
+
+    return results.rows[0];
   }
 
-  static async getItemTableData(itemName: string, itemListColumns: Array<String>, state?: string, orderBy?: Array<String>, limit?: number) {
-    itemName = itemName.toUpperCase().replace(/\s+/g, "");
+  //TODO: Merge getItemTableData with getItem
+  static async getItemTableData(itemType: string, itemListColumns: Array<String>, state?: string, orderBy?: Array<String>, limit?: number) {
+    itemType = ItemHelper.toUpperCaseTrimmed(itemType);
     state = state ? `WHERE "STATE" = '${state}'` : '';
     (limit as any) = limit ? `LIMIT ${limit}` : '';
     let querySelectors = [];
 
     itemListColumns.forEach(column => {
-      querySelectors.push('"' + column.toUpperCase().replace(/\s+/g, "") + '"');
+      querySelectors.push('"' + ItemHelper.toUpperCaseTrimmed(column.toString()) + '"');
     });
 
-    const query = `SELECT ${querySelectors.join(", ")} FROM public."${itemName}" ` +
+    const query = `SELECT ${querySelectors.join(", ")} FROM public."${itemType}" ` +
       `${state} ORDER BY "${orderBy[0]}" ${orderBy[1]} ${limit}`
     const results = await pg.query(query);
 
     return results.rows;
   }
 
-  static async getItemIDs(itemName: string, createdItemDetails: any) {
-    itemName = itemName.toUpperCase().replace(/\s+/g, "");
-    const itemColumns = await ReportingDB.getTableColumns(itemName);
+  static async getItemIDs(itemType: string, createdItemDetails: any) {
+    itemType = ItemHelper.toUpperCaseTrimmed(itemType);
+    const itemColumns = await ReportingDB.getTableColumns(itemType);
     let ID;
     let querySelectors = [];
 
     Object.keys(createdItemDetails).forEach(key => {
       querySelectors.push(
         '"' +
-          key.toUpperCase().replace(/\s+/g, "") +
+          ItemHelper.toUpperCaseTrimmed(key) +
           "\" = '" +
           createdItemDetails[key] +
           "'"
@@ -65,15 +74,15 @@ export class ReportingDB {
 
     const query =
       'SELECT "UUID"' + ID + ' FROM public."' +
-      itemName +
+      itemType +
       '" WHERE ' +
       querySelectors.join(" AND ");
     const results = await pg.query(query);
     return results.rows[0];
   }
 
-  static async getTableColumns(itemName: string) {
-    const query = 'SELECT * FROM public."' + itemName.toUpperCase().replace(/\s+/g, "") + '" WHERE false';
+  static async getTableColumns(itemType: string) {
+    const query = 'SELECT * FROM public."' + ItemHelper.toUpperCaseTrimmed(itemType) + '" WHERE false';
     const results = await pg.query(query);
 
     let fields = []; 

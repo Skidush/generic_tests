@@ -13,6 +13,7 @@ import { ItemForm } from '../hmws/itemForm.hmws';
 import { Item } from "../hmws/item.hmws";
 import { HMWSItems } from "../hmws/items.hmws";
 import { ItemHelper, Application } from "../helpers/test-helpers";
+import { DetailsPO } from "../po/details.po";
 
 
 // const path = `${browser.params.root}\\e2e\\${browser.params.project}\\items.hmws`;
@@ -183,14 +184,14 @@ When('I navigate to a\\/an {string} details page', async function (itemType) {
   const item = new HMWSItems[`${itemType}`]();
   
   let itemDBData = await ReportingDB.getItems(itemType)
-  itemDBData = itemDBData[`${ItemHelper.randomWholeNumber(0, itemDBData.length)}`];
+  itemDBData = itemDBData[`${ItemHelper.randomWholeNumber(0, itemDBData.length - 1)}`];
 
   item.name = itemDBData[item.getUrlIdentifier().toUpperCase()];
-
+  browser.params.selectedItemDetails[itemType] = { Name: item.name }; 
   const currentUrl = await browser.getCurrentUrl();
   await browser.get(item.getUrl());
   
-  const redirected = await Application.isRedirected(currentUrl, item.getCurrentUrl());
+  const redirected = await Application.isRedirected(currentUrl, item.getUrl());
   if (!redirected) {
     throw `The browser did not navigate to the ${itemType} details page`; 
   }
@@ -224,18 +225,39 @@ When('I {string} a {string} item', async function (action: string, itemType: str
 });
 
 
-Then('I should see the {string} details of {string}', function (actionDone: 'created' | 'selected' | 'edited' | 'deleted', itemType) {
+Then('I should see the {string} details of {string}', async function (actionDone: 'created' | 'selected' | 'edited' | 'deleted', itemType) {
   const timeLabel = `Checking the details of the ${actionDone} ${itemType}`; 
   console.time(timeLabel);
 
+  const selectedItem = browser.params.selectedItemDetails[itemType].Name;
   const item = new HMWSItems[`${itemType}`]();
-  item.getUrlIdentifier();
-  // WHERE "item.getUrlIdentifier()" = item.name;
-  // 
-  // const itemDetails = await ReportingDB
+  let filters = [];
+
   switch (actionDone) {
     case 'selected':
+      item.getUrlIdentifier();
+      filters.push(`"${item.getUrlIdentifier()}" = '${selectedItem}'`);
+      let outcomeCols = [];
 
+      Object.keys(item.details.outcome).forEach(key => {
+        outcomeCols.push(key);
+      });
+
+      let itemDetails = await ReportingDB.getItem(itemType, outcomeCols, filters, 'ACTIVE');
+      const actualJSON = {};
+
+      // TODO:TOFIX Remove this when items from outcome view that are shown in tables are saved in reporting d
+      if (itemType === 'Company') {
+        outcomeCols = outcomeCols.filter(ele => ele !== 'Phone' && ele !== 'Email');
+        delete itemDetails.PHONE;
+        delete itemDetails.EMAIL;
+      }
+
+      for (const ele of outcomeCols) {
+        actualJSON[ItemHelper.toUpperCaseTrimmed(ele)] = await DetailsPO.getFieldDetail(ele);
+      }
+
+      expect(itemDetails).to.eql(actualJSON);
       break;
   }
 

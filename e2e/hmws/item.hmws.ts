@@ -7,18 +7,24 @@ export abstract class Item {
     readonly domain: string;
     readonly domainIdentifer: string;
     list: ItemList;
-    // details: ItemDetails;
+    details: ItemDetails;
     // toolbar: ItemToolbar;
     formFields: FormField[];
     pluralName: string;
 
-    constructor(domainProps: Array<string>, pluralName: string, formFields: FormField[], optional?: {itemList?: ItemList}){
+    constructor(domainProps: Array<string>, pluralName: string, formFields: FormField[],
+        optional?: {
+            itemList?: ItemList,
+            itemDetails?: ItemDetails
+        }){
         this.domain = this.getStandardDomain(domainProps[0]);
         this.domainIdentifer = domainProps[1];
         this.formFields = formFields;
         this.pluralName = pluralName;
+        
         if (optional) {
             this.list = optional.itemList;
+            this.details = optional.itemDetails;
         }
     }
 
