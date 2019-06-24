@@ -6,7 +6,7 @@ import {
   protractor,
   browser
 } from "protractor";
-import { ItemHelper } from "./test-helpers";
+import { ItemHelpers } from "./test-helpers";
 
 const EC = protractor.ExpectedConditions;
 
@@ -22,7 +22,7 @@ export class ElementIs {
    */
 
   static present(el: ElementFinder, timer?: number) {
-    timer = ItemHelper.checkAndGetTimer(timer);
+    timer = ItemHelpers.checkAndGetTimer(timer);
     return browser.wait(EC.presenceOf(el), timer).catch(err => {
       err = err.toString().split(":");
       throw "No element found " +
@@ -39,7 +39,7 @@ export class ElementIs {
    * @param timer the time, in milliseconds, for waiting the element to meet the condition
    */
   static visible(el: ElementFinder, timer?: number) {
-    timer = ItemHelper.checkAndGetTimer(timer);
+    timer = ItemHelpers.checkAndGetTimer(timer);
     return browser.wait(EC.visibilityOf(el), timer).catch(err => {
       err = err.toString().split(":");
       throw "Element " +
@@ -50,7 +50,7 @@ export class ElementIs {
   }
 
   static containingText(el: ElementFinder, text: string, timer?: number) {
-    timer = ItemHelper.checkAndGetTimer(timer);
+    timer = ItemHelpers.checkAndGetTimer(timer);
     return browser.wait(EC.textToBePresentInElement(el, text), timer).catch(err => {
       err = err.toString().split(":");
       throw "Element " +
@@ -70,7 +70,7 @@ export class ElementIs {
    * @returns a promise that will represent the staleness of the element
    */
   static stale(el: ElementFinder, timer?: number) {
-    timer = ItemHelper.checkAndGetTimer(timer);
+    timer = ItemHelpers.checkAndGetTimer(timer);
     return browser.wait(EC.stalenessOf(el), timer).catch(err => {
       err = err.toString().split(":");
       throw "Element " +
@@ -91,7 +91,7 @@ export class ElementIs {
    */
 
   static clickable(el: ElementFinder, timer?: number) {
-    timer = ItemHelper.checkAndGetTimer(timer);
+    timer = ItemHelpers.checkAndGetTimer(timer);
     return browser.wait(EC.elementToBeClickable(el), timer).catch(err => {
       err = err.toString().split(":");
       throw "Element " +
@@ -112,7 +112,7 @@ export class GetElement {
    * @returns a promise that will represent the element with the specified ID
    */
   static async byID(id: string, timer?: number) {
-    timer = ItemHelper.checkAndGetTimer(timer);
+    timer = ItemHelpers.checkAndGetTimer(timer);
 
     const el = element(by.id(id));
     await ElementIs.present(el, timer);
@@ -130,7 +130,7 @@ export class GetElement {
    * @returns a promise that represents the element with the specified css and its containing text
    */
   static async byCssContainingText(css: string, text: string, timer?: number) {
-    timer = ItemHelper.checkAndGetTimer(timer);
+    timer = ItemHelpers.checkAndGetTimer(timer);
     const el = element(by.cssContainingText(css, text));
     await ElementIs.present(el, timer);
 
@@ -146,7 +146,7 @@ export class GetElement {
    * @returns a promise that represents the element with the specified class name
    */
   static async byClassName(className: string, timer?: number) {
-    timer = ItemHelper.checkAndGetTimer(timer);
+    timer = ItemHelpers.checkAndGetTimer(timer);
     const el = element(by.className(className));
     await ElementIs.present(el, timer);
 
@@ -163,7 +163,7 @@ export class GetElement {
    */
 
   static async byCss(css: string, timer?: number) {
-    timer = ItemHelper.checkAndGetTimer(timer);
+    timer = ItemHelpers.checkAndGetTimer(timer);
     const el = element(by.css(css));
     await ElementIs.present(el, timer);
 
@@ -178,7 +178,7 @@ export class GetElement {
    */
 
   static async byTagName(tagName: string, timer?: number) {
-    timer = ItemHelper.checkAndGetTimer(timer);
+    timer = ItemHelpers.checkAndGetTimer(timer);
 
     const el = element(by.tagName(tagName));
     await ElementIs.present(el, timer);
@@ -196,7 +196,7 @@ export class GetElement {
    * @returns a promise representing the element with the exact text
    */
   static async byCSSWithExactText(el: ElementArrayFinder, text: string, timer?: number) {
-    timer = ItemHelper.checkAndGetTimer(timer);
+    timer = ItemHelpers.checkAndGetTimer(timer);
     await ElementIs.present(el.first(), timer);
     const elCount = await el.count();
 
@@ -225,7 +225,7 @@ export class GetElement {
    * @returns a promise that will represent the element with the specified XPath
    */
   static async byXPath(XPath: string, timer?: number) {
-    timer = ItemHelper.checkAndGetTimer(timer);
+    timer = ItemHelpers.checkAndGetTimer(timer);
     const el = element(by.xpath(XPath));
 
     await ElementIs.present(el, timer);

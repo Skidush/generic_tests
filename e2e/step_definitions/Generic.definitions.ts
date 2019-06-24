@@ -12,8 +12,10 @@ import { Form } from "../helpers/form-helpers";
 import { ItemForm } from '../hmws/itemForm.hmws';
 import { Item } from "../hmws/item.hmws";
 import { HMWSItems } from "../hmws/items.hmws";
-import { ItemHelper, Application } from "../helpers/test-helpers";
+import { ItemHelpers, Application } from "../helpers/test-helpers";
 import { DetailsPO } from "../po/details.po";
+import { ToolbarPO } from "../po/toolbar.po";
+import { FormPO } from "../po/form.po";
 
 
 // const path = `${browser.params.root}\\e2e\\${browser.params.project}\\items.hmws`;
@@ -23,11 +25,9 @@ import { DetailsPO } from "../po/details.po";
 // }
 const baseUrl = browser.baseUrl;
 
+const generic = new GenericPO();
 const chai = require('chai').use(require('chai-as-promised'));
 const expect = chai.expect;
-
-const generic = new GenericPO();
-const EC = protractor.ExpectedConditions;
 
 
 Given("I have an existing {string}", async function(itemType) {
@@ -106,21 +106,6 @@ When("I {string} a {string}", async function(action, itemType) {
   console.timeEnd(itemType + " action - " + action);
 });
 
-Then(
-  "I should be redirected to the details page of the created {string}",
-  async function(itemType) {
-    console.time("Redirection check for " + itemType);
-
-    console.timeEnd("Redirection check for " + itemType);
-  }
-);
-
-Then("I should see the {string} item details of the {string}", async function(action, itemType
-) {
-  console.time("Details check for " + action + " " + itemType);
-
-  console.timeEnd("Details check for " + action + " " + itemType);
-});
 
 Then("I should {string} the details of the {string} in the table", async function(view: 'see' | 'not see', itemType) {
     const timeLabel = `Searching in the table for ${itemType}`; 
@@ -184,7 +169,7 @@ When('I navigate to a\\/an {string} details page', async function (itemType) {
   const item = new HMWSItems[`${itemType}`]();
   
   let itemDBData = await ReportingDB.getItems(itemType)
-  itemDBData = itemDBData[`${ItemHelper.randomWholeNumber(0, itemDBData.length - 1)}`];
+  itemDBData = itemDBData[`${ItemHelpers.randomWholeNumber(0, itemDBData.length - 1)}`];
 
   item.name = itemDBData[item.getUrlIdentifier().toUpperCase()];
   browser.params.selectedItemDetails[itemType] = { Name: item.name }; 
@@ -199,46 +184,53 @@ When('I navigate to a\\/an {string} details page', async function (itemType) {
 });
 
 
-When('I {string} a {string} item', async function (action: string, itemType: string) {
-  console.time(`Processing ${action} ${itemType}`);
-  const previousURL = await browser.getCurrentUrl();
+When('I {string} a {string} item', async function (action: 'create' | 'edit', itemType: string) {
+  const timeLabel = `Processing ${action} ${itemType}`;
+  console.time(timeLabel);
 
-  await ElementIs.present(generic.toolbar.get(0));
-  const newButton = generic.button('New');
-  await ElementIs.clickable(newButton);
-  await newButton.click();
+  if(action === 'create'){
+    browser.params['previousURL'] = await browser.getCurrentUrl();
+    browser.params[itemType] = {};
 
-  await ElementIs.visible(generic.formHeader);
-  await ElementIs.containingText(generic.formHeader, itemType);
+    const newButton = await ToolbarPO.getNewButton();
+    await ElementIs.clickable(newButton);
+    await newButton.click();
 
-  const itemClass = itemType.replace('\s+', '');
-  const item: Item = new HMWSItems[`${itemClass}`]();
-  await Form.fill(item.buildFormData());
+    const formPanel = await FormPO.getFormPanel();
+    let formHeader = await FormPO.getFormName();
+    await ElementIs.containingText(formHeader, itemType);
 
-  const okButton = generic.button('OK')
-  await ElementIs.clickable(okButton);
-  await okButton.click();
+    const itemClass = itemType.replace('\s+', '');
+    const item: Item = new HMWSItems[`${itemClass}`]();
+    browser.params['inputedData'] = await Form.fill(item.buildFormData());
 
-  await browser.wait(EC.not(EC.urlIs(previousURL)))
+    const okButton = await FormPO.getOkButton();
+    await ElementIs.clickable(okButton);
+    await okButton.click();
 
-  console.timeEnd(`Processing ${action} ${itemType}`);
+    await ElementIs.stale(formPanel);
+
+    browser.params[itemType]['currentTestIndex'] = item.currentTestIndex;
+  }
+
+    console.timeEnd(timeLabel);
 });
 
-
-Then('I should see the {string} details of {string}', async function (actionDone: 'created' | 'selected' | 'edited' | 'deleted', itemType) {
+Then('I should see the {string} details of the {string}', async function (actionDone: 'created' | 'selected' | 'edited' | 'deleted', itemType) {
   const timeLabel = `Checking the details of the ${actionDone} ${itemType}`; 
   console.time(timeLabel);
 
-  const selectedItem = browser.params.selectedItemDetails[itemType].Name;
+  itemType = itemType.replace('\s+', '');
   const item = new HMWSItems[`${itemType}`]();
   let filters = [];
-
+  
   switch (actionDone) {
     case 'selected':
-      item.getUrlIdentifier();
-      filters.push(`"${item.getUrlIdentifier()}" = '${selectedItem}'`);
+      const selectedItem = browser.params.selectedItemDetails[itemType].Name;
       let outcomeCols = [];
-
+      
+      item.getUrlIdentifier();
+      filters.push(`"${item.getUrlIdentifier().toUpperCase()}" = '${selectedItem}'`);
       Object.keys(item.details.outcome).forEach(key => {
         outcomeCols.push(key);
       });
@@ -254,10 +246,33 @@ Then('I should see the {string} details of {string}', async function (actionDone
       }
 
       for (const ele of outcomeCols) {
-        actualJSON[ItemHelper.toUpperCaseTrimmed(ele)] = await DetailsPO.getFieldDetail(ele);
+        actualJSON[ItemHelpers.toUpperCaseTrimmed(ele)] = await DetailsPO.getFieldDetail(ele);
       }
 
       expect(itemDetails).to.eql(actualJSON);
+      break;
+    
+    case 'created':
+      const inputedData = browser.params['inputedData'];
+
+      if(!inputedData){
+        throw(`browser.params['inputedData'] is not defined.`);
+      }
+      
+      const testIndex = browser.params[itemType]['currentTestIndex'];
+      if(Number.isNaN(testIndex)){
+        throw(`browser.params['${itemType}']['currentTestIndex'] is not set.`);
+      }
+      
+      item.initializeTestData(testIndex);
+      const isRedirected = await Application.isRedirected(browser.params['previousURL'], item.getUrl(), 5000);
+      if(isRedirected){
+        item.formFields.forEach((field) => {
+          expect(item[field.key]).to.equal(inputedData[field.ID]);
+        });
+      }
+        else
+          throw('Did not redirect');
       break;
   }
 

@@ -1,7 +1,7 @@
 import { browser, element, by } from "protractor";
 
 import { Form } from "../helpers/form-helpers";
-import { ItemHelper } from "../helpers/test-helpers";
+import { ItemHelpers } from "../helpers/test-helpers";
 import { Application } from "../helpers/test-helpers";
 import { ElementIs, GetElement } from "../helpers/element-helpers";
 import { ReportingDB } from "../helpers/reportingDB-helpers";

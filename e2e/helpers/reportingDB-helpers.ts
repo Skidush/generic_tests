@@ -1,12 +1,12 @@
 import { pgConnection } from "../configurations/pgCon.conf";
-import { ItemHelper } from "./test-helpers";
+import { ItemHelpers } from "./test-helpers";
 
 const pg: pgConnection = new pgConnection();
 
 export class ReportingDB {
   static async getItems(itemType: string, orderBy?: string, limit?: number) {
     orderBy = orderBy ? `ORDER BY "${orderBy[0].toUpperCase()}" ${orderBy[1]}` : '';
-    itemType = ItemHelper.toUpperCaseTrimmed(itemType);
+    itemType = ItemHelpers.toUpperCaseTrimmed(itemType);
 
     let query = `SELECT * FROM public."${itemType}" ${orderBy}`;
     query = limit ? `${query} LIMIT ${limit}` : query;
@@ -17,11 +17,11 @@ export class ReportingDB {
   }
 
   static async getItem(itemType: string, columns?: Array<string>, filters?: Array<string>, state?: string, orderBy?: string, limit?: number) {
-    itemType = ItemHelper.toUpperCaseTrimmed(itemType);
+    itemType = ItemHelpers.toUpperCaseTrimmed(itemType);
     (columns as any) = columns ? `"${columns.join('", "').toUpperCase().replace(/\s+/g, "")}"` : '*';
     state = state ? `"STATE" = '${state}'` : '';
 
-    let filter = filters ? `WHERE ${filters.join(' AND ').toUpperCase()}` : '';
+    let filter = filters ? `WHERE ${filters.join(' AND ')}` : '';
     filter = filter !== '' ? `${filter} AND ${state}` : '';
 
     orderBy = orderBy ? `ORDER BY "${orderBy[0].toUpperCase()}" ${orderBy[1]}`: '';
@@ -35,13 +35,13 @@ export class ReportingDB {
 
   //TODO: Merge getItemTableData with getItem
   static async getItemTableData(itemType: string, itemListColumns: Array<String>, state?: string, orderBy?: Array<String>, limit?: number) {
-    itemType = ItemHelper.toUpperCaseTrimmed(itemType);
+    itemType = ItemHelpers.toUpperCaseTrimmed(itemType);
     state = state ? `WHERE "STATE" = '${state}'` : '';
     (limit as any) = limit ? `LIMIT ${limit}` : '';
     let querySelectors = [];
 
     itemListColumns.forEach(column => {
-      querySelectors.push('"' + ItemHelper.toUpperCaseTrimmed(column.toString()) + '"');
+      querySelectors.push('"' + ItemHelpers.toUpperCaseTrimmed(column.toString()) + '"');
     });
 
     const query = `SELECT ${querySelectors.join(", ")} FROM public."${itemType}" ` +
@@ -52,7 +52,7 @@ export class ReportingDB {
   }
 
   static async getItemIDs(itemType: string, createdItemDetails: any) {
-    itemType = ItemHelper.toUpperCaseTrimmed(itemType);
+    itemType = ItemHelpers.toUpperCaseTrimmed(itemType);
     const itemColumns = await ReportingDB.getTableColumns(itemType);
     let ID;
     let querySelectors = [];
@@ -60,7 +60,7 @@ export class ReportingDB {
     Object.keys(createdItemDetails).forEach(key => {
       querySelectors.push(
         '"' +
-          ItemHelper.toUpperCaseTrimmed(key) +
+          ItemHelpers.toUpperCaseTrimmed(key) +
           "\" = '" +
           createdItemDetails[key] +
           "'"
@@ -80,7 +80,7 @@ export class ReportingDB {
   }
 
   static async getTableColumns(itemType: string) {
-    const query = 'SELECT * FROM public."' + ItemHelper.toUpperCaseTrimmed(itemType) + '" WHERE false';
+    const query = 'SELECT * FROM public."' + ItemHelpers.toUpperCaseTrimmed(itemType) + '" WHERE false';
     const results = await pg.query(query);
 
     let fields = []; 

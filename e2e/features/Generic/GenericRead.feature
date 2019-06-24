@@ -10,18 +10,38 @@ Feature: Read an Item
         When The <itemType> table has loaded
         Then I should <view> the details of the <itemTypePlural> in the table
 
-    @CompaniesCRUD @ReadCompaniesFromTable
+    @CompanyCRUD @ReadCompanyFromTable
     Scenarios:
         | itemType  | itemUrl              | view  | itemTypePlural |
         | "Company" | "/#/hmws/companies"  | "see" | "Companies"    |
 
+    @SkillCRUD @ReadSkillFromTable
+    Scenarios:
+        | itemType  | itemUrl              | view  | itemTypePlural |
+        | "Skill"   | "/#/hmws/skills"     | "see" | "Skills"       |
+
+    @MachineCRUD @ReadMachineFromTable
+    Scenarios:
+        | itemType  | itemUrl              | view  | itemTypePlural |
+        | "Machine" | "/#/hmws/machines"   | "see" | "Machines"     |
+    
     @GenericReadFromDetails
     Scenario Outline: Read <itemType> from the details page
         Given I have an existing <itemType>
         When I navigate to a/an <itemType> details page
-        Then I should see the <action> details of <itemType>
+        Then I should see the <action> details of the <itemType>
 
-    @CompaniesCRUD @ReadCompaniesFromDetails
+    @CompanyCRUD @ReadCompanyFromDetails
     Scenarios:
         | itemType  | itemUrl              | action       |
         | "Company" | "/#/hmws/companies"  | "selected"   |
+
+    @SkillCRUD @ReadSkillFromDetails
+    Scenarios:
+        | itemType  | itemUrl              | action       |
+        | "Skill"   | "/#/hmws/skills"     | "selected"   |
+
+    @MachineCRUD @ReadMachineFromDetails
+    Scenarios:
+        | itemType  | itemUrl              | action       |
+        | "Machine" | "/#/hmws/machines"   | "selected"   |

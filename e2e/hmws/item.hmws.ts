@@ -1,7 +1,6 @@
+import { FormField } from './itemForm.hmws';
 import { ItemList } from './itemList.hmws';
 import { ItemDetails } from './itemDetails.hmws';
-import { ItemToolbar } from './itemToolbar.hmws'
-import { ItemForm, FormField } from './itemForm.hmws';
 
 export abstract class Item {
     readonly domain: string;
@@ -12,6 +11,7 @@ export abstract class Item {
     formFields: FormField[];
     pluralName: string;
 
+    private _currentTestIndex: number;
     constructor(domain: string, domainIdentifier: string, pluralName: string, formFields: FormField[],
         optional?: {
             itemList?: ItemList,
@@ -28,23 +28,43 @@ export abstract class Item {
         }
     }
 
-    abstract getUrl(): string;
     abstract getUrlIdentifier(): string;
-    abstract testData(index?: number): Item;
+    abstract initializeTestData(index?: number): {item: Item, index:number};
+    abstract getUrl(): string;
+
+    get currentTestIndex(): number{
+        if(Number.isInteger(this._currentTestIndex)){
+            return this._currentTestIndex;
+        }
+        throw('currentTestIndex is undefined. Try to invoke `buildFormData()` or set it explicitly.');
+    }
+
+    set currentTestIndex(index: number) {
+        this._currentTestIndex = index;
+    }
 
     buildFormData(): FormField[]{
-        const data = this.testData();
+        const data = this.initializeTestData();
+        this.currentTestIndex = data.index;
         this.formFields.forEach((value, index) =>{
-            this.formFields[index].value = data[value.key]
+            this.formFields[index].value = data.item[value.key]
         });
         return this.formFields;
     }
 
-    private getStandardDomain(itemDomain: string): string {
+    static convert<T extends Item>(castedItem: T, type: {new(): T}): T{
+        let item = new type();
+        Object.keys(castedItem).forEach(key =>{
+            item[key] = castedItem[key];
+        });
+        return item;
+    }
+
+    private getStandardDomain(itemDomain: string): string{
         const parts = itemDomain.split('/');
         let result;
-        parts.forEach((part, index) => {
-            if(index === 0) {
+        parts.forEach((part,index) => {
+            if(index === 0){
                 result = part;
             }
             else {
