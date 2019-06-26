@@ -31,24 +31,6 @@ export class ReportingDB {
     return results.rows;
   }
 
-  //TODO: Merge getItemTableData with getItem
-  // static async getItemTableData(itemType: string, itemListColumns: Array<String>, state?: string, orderBy?: Array<String>, limit?: number) {
-  //   itemType = ItemHelpers.toUpperCaseTrimmed(itemType);
-  //   state = state ? `WHERE "STATE" = '${state}'` : '';
-  //   (limit as any) = limit ? `LIMIT ${limit}` : '';
-  //   let querySelectors = [];
-
-  //   itemListColumns.forEach(column => {
-  //     querySelectors.push('"' + ItemHelpers.toUpperCaseTrimmed(column.toString()) + '"');
-  //   });
-
-  //   const query = `SELECT ${querySelectors.join(", ")} FROM public."${itemType}" ` +
-  //     `${state} ORDER BY "${orderBy[0]}" ${orderBy[1]} ${limit}`
-  //   const results = await pg.query(query);
-
-  //   return results.rows;
-  // }
-
   static async getItemIDs(itemType: string, createdItemDetails: any) {
     itemType = ItemHelpers.toUpperCaseTrimmed(itemType);
     const itemColumns = await ReportingDB.getTableColumns(itemType);

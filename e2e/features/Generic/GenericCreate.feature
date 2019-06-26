@@ -5,21 +5,21 @@ Feature: Create an Item
 
     @GenericCreate
     Scenario Outline: Create a/an <itemType>
-        Given I am on <url>
+        Given I am on <itemUrl>
         When I "create" a/an <itemType> item
         Then I should see the "created" details of the <itemType>
 
     @SkillCRUD @SkillCreate
     Scenarios:
-        | url              | itemType |
+        | itemUrl          | itemType |
         | "/#/hmws/skills" | "Skill"  |
 
     @MachineCRUD @MachineCreate
     Scenarios:
-        | url                | itemType  |
+        | itemUrl            | itemType  |
         | "/#/hmws/machines" | "Machine" |
 
     @CompanyCrud @CompanyCreate
     Scenarios:
-        | url                 | itemType  |
+        | itemUrl             | itemType  |
         | "/#/hmws/companies" | "Company" |

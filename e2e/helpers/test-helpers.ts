@@ -55,15 +55,17 @@ export class Application {
    *
    * @returns a promise that represent if the user has been redirected
    */
-  static isRedirected(oldUrl: string, newUrl: string, timer?: number) {
+  static async isRedirected(oldUrl: string, newUrl: string, timer?: number) {
     timer = ItemHelpers.checkAndGetTimer(timer);
-    return browser.wait(EC.urlIs(newUrl), timer).then(() => {
-      if (oldUrl === newUrl) {
-        return false;
-      }
-      return true;
-    }, () => {
+    await browser.wait(EC.urlIs(newUrl), timer).catch(() => {
       return false;
     });
+
+    const currentUrl = await browser.getCurrentUrl();
+    if (currentUrl === oldUrl) {
+      return false;
+    }
+     
+    return true;
   }
 }

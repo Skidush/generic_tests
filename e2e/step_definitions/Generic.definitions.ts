@@ -59,12 +59,6 @@ Given("I go to {string}", async function(path) {
   console.timeEnd(timeLabel);
 });
 
-When('I click the {string} button', async function (buttonID) {
-  const button = generic.button(buttonID);
-  await ElementIs.clickable(button);
-  await button.click();
-});
-
 Given("I am on {string}", async function(path) {
   const timeLabel = "Configuring the system to be on " + path;
   console.time(timeLabel);
@@ -76,6 +70,12 @@ Given("I am on {string}", async function(path) {
   }
 
   console.timeEnd(timeLabel);
+});
+
+When('I click the {string} button', async function (buttonID) {
+  const button = generic.button(buttonID);
+  await ElementIs.clickable(button);
+  await button.click();
 });
 
 When('The {string} table has loaded', async function (itemType) {
@@ -99,64 +99,6 @@ When('The {string} table has loaded', async function (itemType) {
   
   await ElementIs.stale(element(by.className('ui-table-loading')));
 
-  console.timeEnd(timeLabel);
-});
-
-Then("I should {string} the details of the {string} in the table", async function(view: 'see' | 'not see', itemType) {
-  const timeLabel = `Searching in the table for ${itemType}`; 
-  console.time(timeLabel);
-  
-  itemType = GenericHelper.getSingularName(itemType);
-  const parsedItemData = [];
-  
-  let filters = [`"STATE" = 'ACTIVE'`];
-
-  const item = new HMWSItems[`${itemType}`]();
-  const itemDBData = await ReportingDB.getItem(
-      itemType, item.list.columns, filters, item.list.orderBy, item.list.pageRows);
-  
-  for (const col of item.list.columns) {
-      await ItemListPO.getColumn(col.replace(/\s+/g, ""));
-  }
-  const tableHeader = await ItemListPO.getTableHeader();
-  let tableHeaderText: any = await tableHeader.getText();
-  tableHeaderText = tableHeaderText.split('\n');
-  // Sometimes protractor doesn't get the text of the column that is off-screen.
-  // Place it in the expected columns since it passed the check earlier
-  for (const col of item.list.columns) {
-    if (!tableHeaderText.includes(col)){
-      tableHeaderText.push(col);
-    }
-  }
-  
-  const tableRows = ItemListPO.getTableRows();
-  await ElementIs.present(tableRows.first());
-  // TODO:TOFIX blinking elements in the table when reloading the table
-  await ElementIs.stale(element(by.className('ui-table-loading')));
-  const itemListData: any = await tableRows.getText();
-  itemListData.unshift(tableHeaderText);
-  
-  if (browser.params.itemDetails[itemType] && browser.params.itemDetails[itemType]['currentAction'] === 'delete' && view === 'not see') {
-    const deletedData: any = browser.params.itemDetails[itemType]['deletedData'];
-    expect(itemListData).to.not.include(deletedData);
-  } else {
-    // Parse the data from Reporting DB to match the format of the data extracted from the table
-    for (const item of itemDBData) {
-      let rowData;
-      Object.keys(item).forEach(key => {
-        if (!item[key]) {
-          return;
-        }
-        item[key] = item[key].replace(/ {1,}/g, " ");
-        rowData = rowData ? rowData + ' ' + item[key] : item[key];
-      });
-      parsedItemData.push(rowData);
-    }
-    
-    parsedItemData.unshift(item.list.columns);
-    expect(itemListData).to.eql(parsedItemData);
-  }
-  
   console.timeEnd(timeLabel);
 });
 
@@ -186,7 +128,6 @@ When('I navigate to a\\/an {string} details page', async function (itemType) {
   }
   console.timeEnd(timeLabel);
 });
-
 
 When('I {string} a\\/an {string} item', async function (action: 'create' | 'edit' | 'select' | 'delete', itemType: string) {
   const timeLabel = `Processing ${action} ${itemType}`;
@@ -221,17 +162,17 @@ When('I {string} a\\/an {string} item', async function (action: 'create' | 'edit
     
         browser.params.itemDetails[itemType]['currentTestIndex'] = item.currentTestIndex;
       break;
+    case 'edit':
     case 'delete':
-        browser.params.itemDetails[itemType]['deletedData'] = {};
         const filters = [`"STATE" = 'ACTIVE'`];
         let randomItem: any = await ReportingDB.getItem(itemType, item.list.columns, filters, item.list.orderBy, item.list.pageRows);
         const randomIndex = ItemHelpers.randomWholeNumber(0, randomItem.length - 1);
         randomItem = randomItem[randomIndex];
-
+      
         await ElementIs.present(ItemListPO.getTableRows().get(randomIndex));
         const tableRow = await ItemListPO.getTableRows().get(randomIndex);
         const tableRowData = await tableRow.getText();
-
+        
         if (item.list.selector === 'Row') {
           await tableRow.click();
         } else if (item.list.selector === 'Radio Button') {
@@ -240,23 +181,110 @@ When('I {string} a\\/an {string} item', async function (action: 'create' | 'edit
           await ElementIs.stale(element(by.className('ui-table-loading')));
           radioButton.click();
         }
+        
+        if (action === 'delete') {
+          browser.params.itemDetails[itemType]['deletedData'] = {};
+          const deleteButton = await ToolbarPO.getDeleteButton();
+          await deleteButton.click();
+          
+          const dialog = await ToolbarPO.getDialog();
+          const yesDialogButton = await ToolbarPO.getDialogYesButton();
+          yesDialogButton.click();
+  
+          await ElementIs.stale(dialog);
+  
+          browser.params.itemDetails[itemType]['deletedData'] = tableRowData;
+        } else if (action === 'edit') {
+          browser.params.itemDetails[itemType]['editedData'] = {};
+          const editButton = await ToolbarPO.getEditButton();
+          await editButton.click();
 
-        const deleteButton = await ToolbarPO.getDeleteButton();
-        await deleteButton.click();
+          const formPanel = await FormPO.getFormPanel();
+          let formHeader = await FormPO.getFormName();
 
-        const dialog = await ToolbarPO.getDialog();
-        const yesDialogButton = await ToolbarPO.getDialogYesButton();
-        yesDialogButton.click();
+          await ElementIs.containingText(formHeader, itemType);
 
-        await ElementIs.stale(dialog);
-
-        browser.params.itemDetails[itemType]['deletedData'] = tableRowData;
+          browser.params.itemDetails[itemType]['inputtedData'] = await Form.fill(item.buildFormData());
+    
+          const okButton = await FormPO.getOkButton();
+          await ElementIs.clickable(okButton);
+          await okButton.click();
+      
+          await ElementIs.stale(formPanel);
+      
+          browser.params.itemDetails[itemType]['currentTestIndex'] = item.currentTestIndex;
+        }
         break;
     }
       
     browser.params.itemDetails[itemType]['currentAction'] = action;
     
     console.timeEnd(timeLabel);
+});
+
+Then("I should {string} the details of the {string} in the table", async function(view: 'see' | 'not see', itemType) {
+  const timeLabel = `Searching in the table for ${itemType}`; 
+  console.time(timeLabel);
+  
+  itemType = GenericHelper.getSingularName(itemType);
+  const expectedData = [];
+  
+  let filters = [`"STATE" = 'ACTIVE'`];
+
+  const item = new HMWSItems[`${itemType}`]();
+  const itemDBData = await ReportingDB.getItem(
+      itemType, item.list.columns, filters, item.list.orderBy, item.list.pageRows);
+  
+  for (const col of item.list.columns) {
+      await ItemListPO.getColumn(col.replace(/\s+/g, ""));
+  }
+
+  const tableHeader = await ItemListPO.getTableHeader();
+  let tableHeaderText: any = await tableHeader.getText();
+  tableHeaderText = tableHeaderText.split('\n');
+  // Sometimes protractor doesn't get the text of the column that is off-screen.
+  // Place it in the expected columns since it passed the check earlier
+  for (const col of item.list.columns) {
+    if (!tableHeaderText.includes(col)){
+      tableHeaderText.push(col);
+    }
+  }
+  
+  //TODO:TOFIX Rows blinking after delete or edit leading to stale element error
+  await ElementIs.stale(element(by.className('ui-table-loading')));
+  await browser.sleep(1500);
+  const tableRows = ItemListPO.getTableRows();
+  await ElementIs.present(tableRows.first());
+
+  const itemListData: any = await tableRows.getText();
+  itemListData.unshift(tableHeaderText);
+  
+  const currentAction = browser.params.itemDetails[itemType]['currentAction'];
+  if (currentAction === 'delete' && view === 'not see') {
+    const deletedData: any = browser.params.itemDetails[itemType]['deletedData'];
+    expect(itemListData).to.not.include(deletedData);
+  } else if (currentAction === 'edit' && view === 'see') {
+    expectedData.push(Object.values(browser.params.itemDetails[itemType]['inputtedData']).join(' ').concat(' ACTIVE'));
+    expect(itemListData).to.include(expectedData[0]);
+  } else {
+    // Parse the data from Reporting DB to match the format of the data extracted from the table
+    for (const item of itemDBData) {
+      let rowData;
+      Object.keys(item).forEach(key => {
+        if (!item[key]) {
+          return;
+        }
+        item[key] = item[key].replace(/ {1,}/g, " ");
+        rowData = rowData ? rowData + ' ' + item[key] : item[key];
+      });
+      expectedData.push(rowData);
+    }
+    
+    expectedData.unshift(item.list.columns);
+    expect(itemListData).to.eql(expectedData);
+  }
+  
+  console.timeEnd(timeLabel);
 });
 
 Then('I should see the {string} details of the {string}', async function (actionDone: 'created' | 'selected' | 'edited' | 'deleted', itemType) {
@@ -266,7 +294,7 @@ Then('I should see the {string} details of the {string}', async function (action
   itemType = itemType.replace('\s+', '');
   const item = new HMWSItems[`${itemType}`]();
   let filters = [];
-  
+
   switch (actionDone) {
     case 'selected':
         const selectedItem = browser.params.itemDetails[itemType]['selectedData'].Name;
@@ -283,7 +311,7 @@ Then('I should see the {string} details of the {string}', async function (action
         itemDetails = itemDetails[0];
         const actualJSON = {};
 
-        // TODO:TOFIX Remove this when items from outcome view that are shown in tables are saved in reporting d
+        // TODO:TOFIX Remove this when items from outcome view that are shown in tables are saved in reporting db
         if (itemType === 'Company') {
           outcomeCols = outcomeCols.filter(ele => ele !== 'Phone' && ele !== 'Email');
           delete itemDetails.PHONE;
@@ -296,29 +324,32 @@ Then('I should see the {string} details of the {string}', async function (action
 
         expect(itemDetails).to.eql(actualJSON);
       break;
-    
     case 'created':
+    case 'edited':
         const inputtedData = browser.params.itemDetails[itemType]['inputtedData'];
 
         if(!inputtedData){
-          throw(`browser.params.itemDetails[${itemType}]['inputtedData'] is not defined.`);
+          throw(`The item details of the ${actionDone} ${itemType} is not defined.`);
         }
         
         const testIndex = browser.params.itemDetails[itemType]['currentTestIndex'];
         if(Number.isNaN(testIndex)){
-          throw(`browser.params.itemDetails['${itemType}']['currentTestIndex'] is not set.`);
+          throw(`The currentTestIndex of the ${actionDone} ${itemType} is not set.`);
         }
-        
-        item.initializeTestData(testIndex);
-        const isRedirected = await Application.isRedirected(browser.params.itemDetails[itemType]['previousURL'], item.getUrl(), 5000);
-        if(isRedirected){
-          item.formFields.forEach((field) => {
-            expect(item[field.key]).to.equal(inputtedData[field.ID]);
-          });
+
+        if (actionDone === 'created') {
+          item.initializeTestData(testIndex);
+          const isRedirected = await Application.isRedirected(browser.params.itemDetails[itemType]['previousURL'], item.getUrl(), 5000);
+          if(isRedirected){
+            item.formFields.forEach((field) => {
+              console.log('Expect: ', item[field.key], ' to equal : ', inputtedData[field.ID]);
+              expect(item[field.key]).to.equal(inputtedData[field.ID]);
+            });
+          } else {
+            throw(`The browser did not redirect to: ${item.getUrl()}`);
+          }
         }
-          else
-            throw('Did not redirect');
-      break;
+      break;    
   }
 
   console.timeEnd(timeLabel);

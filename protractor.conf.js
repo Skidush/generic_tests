@@ -18,6 +18,7 @@ exports.config = {
     './e2e/features/Login.feature',
     './e2e/features/*/GenericCreate.feature',
     './e2e/features/*/GenericRead.feature',
+    './e2e/features/*/GenericEdit.feature',
     './e2e/features/*/GenericDelete.feature',
   ],
   framework:'custom',

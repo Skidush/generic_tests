@@ -20,7 +20,7 @@ export class GenericHelper {
     let retVal = Object.keys(itemNames).find(key => itemNames[key] === itemNamePlural);
     // If undefined, it probably isn't defined or the item name is already singular
     if (!retVal) {
-      return retVal;
+      return itemNamePlural;
     }
 
     return retVal;
