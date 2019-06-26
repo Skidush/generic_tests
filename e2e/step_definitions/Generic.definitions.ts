@@ -4,7 +4,6 @@ import { browser, protractor, by, element } from "protractor";
 import { GenericPO } from "../po/generic.po";
 
 import { ItemListPO } from "../po/item-list.po";
-import { GenericHelper } from "../helpers/generic-helpers";
 import { ReportingDB } from "../helpers/reportingDB-helpers";
 import { ElementIs } from "../helpers/element-helpers";
 import { Form } from "../helpers/form-helpers";
