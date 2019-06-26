@@ -173,12 +173,13 @@ When('I {string} a\\/an {string} item', async function (action: 'create' | 'edit
         const tableRow = await ItemListPO.getTableRows().get(randomIndex);
         const tableRowData = await tableRow.getText();
 
+        // Some tables (e.g Machine item list) show the rows while its still loading
+        await ElementIs.stale(element(by.className('ui-table-loading')));
+
         if (item.list.selector === 'Row') {
           await tableRow.click();
         } else if (item.list.selector === 'Radio Button') {
           const radioButton = await tableRow.element(by.css('.RadioButton span'));
-          // Some tables (e.g Machine item list) show the rows while its still loading
-          await ElementIs.stale(element(by.className('ui-table-loading')));
           radioButton.click();
         }
 
@@ -229,12 +230,12 @@ Then("I should {string} the details of the {string} in the table", async functio
   // itemType = GenericHelper.getSingularName(itemType);
   itemType = ItemRegistrar.findClass(itemType)
   const expectedData = [];
-
+  
   let filters = [`"STATE" = 'ACTIVE'`];
-
+  
   const item = new HMWSItems[`${itemType}`]();
   const itemDBData = await ReportingDB.getItem(
-      itemType, item.list.columns, filters, item.list.orderBy, item.list.pageRows);
+    itemType, item.list.columns, filters, item.list.orderBy, item.list.pageRows);
 
   for (const col of item.list.columns) {
       await ItemListPO.getColumn(col.replace(/\s+/g, ""));
@@ -260,7 +261,7 @@ Then("I should {string} the details of the {string} in the table", async functio
   const itemListData: any = await tableRows.getText();
   itemListData.unshift(tableHeaderText);
 
-  const currentAction = browser.params.itemDetails[itemType]['currentAction'];
+  const currentAction = browser.params.itemDetails[itemType] ? browser.params.itemDetails[itemType]['currentAction'] : null;
   if (currentAction === 'delete' && view === 'not see') {
     const deletedData: any = browser.params.itemDetails[itemType]['deletedData'];
     expect(itemListData).to.not.include(deletedData);
@@ -343,7 +344,6 @@ Then('I should see the {string} details of the {string}', async function (action
           const isRedirected = await Application.isRedirected(browser.params.itemDetails[itemType]['previousURL'], item.getUrl(), 5000);
           if(isRedirected){
             item.formFields.forEach((field) => {
-              console.log('Expect: ', item[field.key], ' to equal : ', inputtedData[field.ID]);
               expect(item[field.key]).to.equal(inputtedData[field.ID]);
             });
           } else {

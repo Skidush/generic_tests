@@ -6,12 +6,13 @@ import { HMWSItems } from './items.hmws';
 export abstract class Item {
     readonly domain: string;
     readonly domainIdentifer: string;
+    readonly pluralName: string;
+    readonly singularName: string;
+
     list: ItemList;
     details: ItemDetails;
     // toolbar: ItemToolbar;
     formFields: FormField[];
-    readonly pluralName: string;
-    readonly singularName: string;
 
     private _currentTestIndex: number;
     constructor(domain: string, domainIdentifier: string, singularName:string, pluralName: string, formFields: FormField[],

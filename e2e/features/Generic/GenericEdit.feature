@@ -10,7 +10,17 @@ Feature: Edit an Item
         When I "edit" a/an <itemType> item
         Then I should "see" the details of the <itemType> in the table
         
-    @SkillsCRUD @SkillEdit
+    @SkillCRUD @SkillEdit
     Scenarios:
         | itemUrl          | itemType |
         | "/#/hmws/skills" | "Skill"  |
+
+    @MachineCRUD @MachineEdit
+    Scenarios:
+        | itemUrl            | itemType    |
+        | "/#/hmws/machines" | "Machine"  |
+
+    @CompanyCRUD @CompanyEdit
+    Scenarios:
+        | itemUrl             | itemType     |
+        | "/#/hmws/companies" | "Company"    |

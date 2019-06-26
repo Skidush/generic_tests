@@ -55,7 +55,7 @@ export namespace HMWSItems{
                 {name: 'V2', longName: 'Vaklang 2woh', ABN: 'ABN'}
             ];
 
-            const num = index | ItemHelpers.randomWholeNumber(0, companies.length-1);
+            const num = index ? index : ItemHelpers.randomWholeNumber(0, companies.length-1);
             const test = companies[num]
             Object.keys(test).forEach(key =>{
                 this[key] = test[key];
@@ -114,7 +114,7 @@ export namespace HMWSItems{
                 {name: 'Walk', description: 'Walk like a human'}
             ];
 
-            const num = index | ItemHelpers.randomWholeNumber(0,skills.length-1);
+            const num = index ? index : ItemHelpers.randomWholeNumber(0,skills.length-1);
             const test = skills[num]
             Object.keys(test).forEach(key =>{
                 this[key] = test[key];
@@ -176,7 +176,7 @@ export namespace HMWSItems{
                 {name: 'Washing Machine', model: 'WASHMAN321', serialNumber: '123NAMHSAW'}
             ];
 
-            const num = index | ItemHelpers.randomWholeNumber(0,machines.length-1);
+            const num = index ? index : ItemHelpers.randomWholeNumber(0,machines.length-1);
             const test = machines[num]
             Object.keys(test).forEach(key =>{
                 this[key] = test[key];
