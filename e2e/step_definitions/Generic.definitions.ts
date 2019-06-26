@@ -10,7 +10,7 @@ import { ElementIs } from "../helpers/element-helpers";
 import { Form } from "../helpers/form-helpers";
 
 import { ItemForm } from '../hmws/itemForm.hmws';
-import { Item } from "../hmws/item.hmws";
+import { Item, ItemRegistrar } from "../hmws/item.hmws";
 import { HMWSItems } from "../hmws/items.hmws";
 import { ItemHelpers, Application } from "../helpers/test-helpers";
 import { DetailsPO } from "../po/details.po";
@@ -88,15 +88,15 @@ When('The {string} table has loaded', async function (itemType) {
   for (const col of itemColumns) {
       await ItemListPO.getColumn(col.replace(/\s+/g, ""));
   }
-  
+
   const itemTableRows = ItemListPO.getTableRows();
   await ElementIs.present(itemTableRows.first());
   const itemTableRowCount = await itemTableRows.count();
-  
+
   if (itemTableRowCount === 0) {
       throw 'The table did not load any rows'
   }
-  
+
   await ElementIs.stale(element(by.className('ui-table-loading')));
 
   console.timeEnd(timeLabel);
@@ -107,24 +107,24 @@ When('I navigate to a\\/an {string} details page', async function (itemType) {
   console.time(timeLabel);
 
   const item = new HMWSItems[`${itemType}`]();
-  
+
   let itemDBData = await ReportingDB.getItems(itemType)
   itemDBData = itemDBData[`${ItemHelpers.randomWholeNumber(0, itemDBData.length - 1)}`];
 
   item.name = itemDBData[item.getUrlIdentifier().toUpperCase()];
 
   if (!browser.params.itemDetails[itemType]) {
-    browser.params.itemDetails[itemType] = {}; 
+    browser.params.itemDetails[itemType] = {};
   }
 
   browser.params.itemDetails[itemType]['selectedData'] = { Name: item.name };
 
   const currentUrl = await browser.getCurrentUrl();
   await browser.get(item.getUrl());
-  
+
   const redirected = await Application.isRedirected(currentUrl, item.getUrl());
   if (!redirected) {
-    throw `The browser did not navigate to the ${itemType} details page`; 
+    throw `The browser did not navigate to the ${itemType} details page`;
   }
   console.timeEnd(timeLabel);
 });
@@ -132,34 +132,34 @@ When('I navigate to a\\/an {string} details page', async function (itemType) {
 When('I {string} a\\/an {string} item', async function (action: 'create' | 'edit' | 'select' | 'delete', itemType: string) {
   const timeLabel = `Processing ${action} ${itemType}`;
   console.time(timeLabel);
-  
+
   let formPanel;
   let formHeader;
 
   itemType = itemType.replace('\s+', '');
   const item: Item = new HMWSItems[`${itemType}`]();
-  
+
   browser.params.itemDetails[itemType] = {};
   browser.params.itemDetails[itemType]['previousURL'] = await browser.getCurrentUrl();
-  
+
   switch (action) {
-    case 'create':  
+    case 'create':
         const newButton = await ToolbarPO.getNewButton();
         await ElementIs.clickable(newButton);
         await newButton.click();
-    
+
         formPanel = await FormPO.getFormPanel();
         formHeader = await FormPO.getFormName();
         await ElementIs.containingText(formHeader, itemType);
-    
+
         browser.params.itemDetails[itemType]['inputtedData'] = await Form.fill(item.buildFormData());
-    
+
         const okButton = await FormPO.getOkButton();
         await ElementIs.clickable(okButton);
         await okButton.click();
-    
+
         await ElementIs.stale(formPanel);
-    
+
         browser.params.itemDetails[itemType]['currentTestIndex'] = item.currentTestIndex;
       break;
     case 'edit':
@@ -168,31 +168,31 @@ When('I {string} a\\/an {string} item', async function (action: 'create' | 'edit
         let randomItem: any = await ReportingDB.getItem(itemType, item.list.columns, filters, item.list.orderBy, item.list.pageRows);
         const randomIndex = ItemHelpers.randomWholeNumber(0, randomItem.length - 1);
         randomItem = randomItem[randomIndex];
-      
+
         await ElementIs.present(ItemListPO.getTableRows().get(randomIndex));
         const tableRow = await ItemListPO.getTableRows().get(randomIndex);
         const tableRowData = await tableRow.getText();
-        
+
         if (item.list.selector === 'Row') {
           await tableRow.click();
         } else if (item.list.selector === 'Radio Button') {
           const radioButton = await tableRow.element(by.css('.RadioButton span'));
-          // Some tables (e.g Machine item list) show the rows while its still loading 
+          // Some tables (e.g Machine item list) show the rows while its still loading
           await ElementIs.stale(element(by.className('ui-table-loading')));
           radioButton.click();
         }
-        
+
         if (action === 'delete') {
           browser.params.itemDetails[itemType]['deletedData'] = {};
           const deleteButton = await ToolbarPO.getDeleteButton();
           await deleteButton.click();
-          
+
           const dialog = await ToolbarPO.getDialog();
           const yesDialogButton = await ToolbarPO.getDialogYesButton();
           yesDialogButton.click();
-  
+
           await ElementIs.stale(dialog);
-  
+
           browser.params.itemDetails[itemType]['deletedData'] = tableRowData;
         } else if (action === 'edit') {
           browser.params.itemDetails[itemType]['editedData'] = {};
@@ -205,36 +205,37 @@ When('I {string} a\\/an {string} item', async function (action: 'create' | 'edit
           await ElementIs.containingText(formHeader, itemType);
 
           browser.params.itemDetails[itemType]['inputtedData'] = await Form.fill(item.buildFormData());
-    
+
           const okButton = await FormPO.getOkButton();
           await ElementIs.clickable(okButton);
           await okButton.click();
-      
+
           await ElementIs.stale(formPanel);
-      
+
           browser.params.itemDetails[itemType]['currentTestIndex'] = item.currentTestIndex;
         }
         break;
     }
-      
+
     browser.params.itemDetails[itemType]['currentAction'] = action;
-    
+
     console.timeEnd(timeLabel);
 });
 
 Then("I should {string} the details of the {string} in the table", async function(view: 'see' | 'not see', itemType) {
-  const timeLabel = `Searching in the table for ${itemType}`; 
+  const timeLabel = `Searching in the table for ${itemType}`;
   console.time(timeLabel);
-  
-  itemType = GenericHelper.getSingularName(itemType);
+
+  // itemType = GenericHelper.getSingularName(itemType);
+  itemType = ItemRegistrar.findClass(itemType)
   const expectedData = [];
-  
+
   let filters = [`"STATE" = 'ACTIVE'`];
 
   const item = new HMWSItems[`${itemType}`]();
   const itemDBData = await ReportingDB.getItem(
       itemType, item.list.columns, filters, item.list.orderBy, item.list.pageRows);
-  
+
   for (const col of item.list.columns) {
       await ItemListPO.getColumn(col.replace(/\s+/g, ""));
   }
@@ -249,7 +250,7 @@ Then("I should {string} the details of the {string} in the table", async functio
       tableHeaderText.push(col);
     }
   }
-  
+
   //TODO:TOFIX Rows blinking after delete or edit leading to stale element error
   await ElementIs.stale(element(by.className('ui-table-loading')));
   await browser.sleep(1500);
@@ -258,7 +259,7 @@ Then("I should {string} the details of the {string} in the table", async functio
 
   const itemListData: any = await tableRows.getText();
   itemListData.unshift(tableHeaderText);
-  
+
   const currentAction = browser.params.itemDetails[itemType]['currentAction'];
   if (currentAction === 'delete' && view === 'not see') {
     const deletedData: any = browser.params.itemDetails[itemType]['deletedData'];
@@ -279,16 +280,16 @@ Then("I should {string} the details of the {string} in the table", async functio
       });
       expectedData.push(rowData);
     }
-    
+
     expectedData.unshift(item.list.columns);
     expect(itemListData).to.eql(expectedData);
   }
-  
+
   console.timeEnd(timeLabel);
 });
 
 Then('I should see the {string} details of the {string}', async function (actionDone: 'created' | 'selected' | 'edited' | 'deleted', itemType) {
-  const timeLabel = `Checking the details of the ${actionDone} ${itemType}`; 
+  const timeLabel = `Checking the details of the ${actionDone} ${itemType}`;
   console.time(timeLabel);
 
   itemType = itemType.replace('\s+', '');
@@ -299,7 +300,7 @@ Then('I should see the {string} details of the {string}', async function (action
     case 'selected':
         const selectedItem = browser.params.itemDetails[itemType]['selectedData'].Name;
         let outcomeCols = [];
-        
+
         item.getUrlIdentifier();
         filters.push(`"${item.getUrlIdentifier().toUpperCase()}" = '${selectedItem}'`);
         filters.push(`"STATE" = 'ACTIVE'`);
@@ -331,7 +332,7 @@ Then('I should see the {string} details of the {string}', async function (action
         if(!inputtedData){
           throw(`The item details of the ${actionDone} ${itemType} is not defined.`);
         }
-        
+
         const testIndex = browser.params.itemDetails[itemType]['currentTestIndex'];
         if(Number.isNaN(testIndex)){
           throw(`The currentTestIndex of the ${actionDone} ${itemType} is not set.`);
@@ -349,7 +350,7 @@ Then('I should see the {string} details of the {string}', async function (action
             throw(`The browser did not redirect to: ${item.getUrl()}`);
           }
         }
-      break;    
+      break;
   }
 
   console.timeEnd(timeLabel);

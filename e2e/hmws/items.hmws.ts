@@ -8,11 +8,11 @@ import { browser } from 'protractor';
 import { ItemHelpers } from '../helpers/test-helpers';
 
 export namespace HMWSItems{
-    export class Company extends Item {
+    export class Company extends Item{
         name: string;
         longName: string;
         ABN: string;
-        
+
         constructor() {
             const formFields: FormField[] = [
                 {ID: 'Name',        field: 'input', key: 'name'},
@@ -39,9 +39,10 @@ export namespace HMWSItems{
             super(
                 'hmws/companies',
                 'name',
+                'Company',
                 'Companies',
-                formFields, 
-                { 
+                formFields,
+                {
                     itemList: itemList,
                     itemDetails: itemDetails
                 }
@@ -97,7 +98,8 @@ export namespace HMWSItems{
             super(
                 'hmws/skills',
                 'name',
-                'Skils',
+                'Skill',
+                'Skills',
                 formFields,
                 {
                     itemList: itemList,
@@ -158,6 +160,7 @@ export namespace HMWSItems{
             super(
                 'hmws/machines',
                 'name',
+                'Machine',
                 'Machines',
                 formFields,
                 {
