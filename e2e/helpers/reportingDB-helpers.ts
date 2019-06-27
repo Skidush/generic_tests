@@ -21,7 +21,7 @@ export class ReportingDB {
 
     let columnString = '*';
     let orderByString = '';
-    
+
     if (columns) {
       columnString = ItemHelpers.toUpperCaseTrimmed(`${columns.join('", "')}`);
     }
@@ -31,7 +31,7 @@ export class ReportingDB {
     }
 
     const filter = filters ? `WHERE ${filters.join(' AND ')}` : '';
-    (limit as any) = limit ? `LIMIT ${limit}` : ''; 
+    (limit as any) = limit ? `LIMIT ${limit}` : '';
 
     const query = `SELECT "${columnString}" FROM public."${itemType}" ${filter} ${orderByString} ${limit}`;
     const results = await pg.query(query);
@@ -46,10 +46,10 @@ export class ReportingDB {
     let querySelectors = [];
 
     Object.keys(createdItemDetails).forEach(key => {
-      querySelectors.push(`"${ItemHelpers.toUpperCaseTrimmed(key)}" = '${createdItemDetails[key]};`);
+      querySelectors.push(`"${ItemHelpers.toUpperCaseTrimmed(key)}" = '${createdItemDetails[key]}`);
     });
 
-    if (itemColumns.indexOf('ID')) {
+    if (itemColumns.indexOf('ID') >= 0) {
       IDs.concat(', "ID"');
     }
 
@@ -62,7 +62,7 @@ export class ReportingDB {
     const query = 'SELECT * FROM public."' + ItemHelpers.toUpperCaseTrimmed(itemType) + '" WHERE false';
     const results = await pg.query(query);
 
-    let fields = []; 
+    let fields = [];
     results.fields.forEach(field => {
       fields.push(field.name);
     });
