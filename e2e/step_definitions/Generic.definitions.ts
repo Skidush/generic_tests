@@ -2,19 +2,21 @@ import { Given, When, Then } from "cucumber";
 import { browser, protractor, by, element } from "protractor";
 
 import { GenericPO } from "../po/generic.po";
-
 import { ItemListPO } from "../po/item-list.po";
-import { ReportingDB } from "../helpers/reportingDB-helpers";
-import { ElementIs } from "../helpers/element-helpers";
-import { Form } from "../helpers/form-helpers";
-
-import { ItemForm } from '../hmws/itemForm.hmws';
-import { Item, ItemRegistrar } from "../hmws/item.hmws";
-import { HMWSItems } from "../hmws/items.hmws";
-import { ItemHelpers, Application } from "../helpers/test-helpers";
 import { DetailsPO } from "../po/details.po";
 import { ToolbarPO } from "../po/toolbar.po";
 import { FormPO } from "../po/form.po";
+
+import { ReportingDB } from "../helpers/reportingDB-helpers";
+import { ElementIs } from "../helpers/element-helpers";
+import { Form } from "../helpers/form-helpers";
+import { ItemHelpers, Application } from "../helpers/test-helpers";
+
+import { ItemForm } from '../hmws/itemForm.hmws';
+import { Item, ItemRegistrar } from "../hmws/item.hmws";
+import { TableSelector } from "../hmws/itemList.hmws";
+import { HMWSItems } from "../hmws/items.hmws";
+
 
 
 // const path = `${browser.params.root}\\e2e\\${browser.params.project}\\items.hmws`;
@@ -175,9 +177,9 @@ When('I {string} a\\/an {string} item', async function (action: 'create' | 'edit
         // Some tables (e.g Machine item list) show the rows while its still loading
         await ElementIs.stale(element(by.className('ui-table-loading')));
 
-        if (item.list.selector === 'Row') {
+        if (item.list.selector === TableSelector.ROW) {
           await tableRow.click();
-        } else if (item.list.selector === 'Radio Button') {
+        } else if (item.list.selector === TableSelector.RADIOBUTTON) {
           const radioButton = await tableRow.element(by.css('.RadioButton span'));
           radioButton.click();
         }
