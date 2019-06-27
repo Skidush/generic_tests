@@ -1,9 +1,77 @@
-import { FormField } from './itemForm.hmws';
+
+import { ItemList, TableSelector } from './itemList.hmws';
+import { ItemDetails, Outcome } from './itemDetails.hmws';
+import { ItemToolbar } from './itemToolbar.hmws'
+import { ItemForm, FormField } from './itemForm.hmws';
+import { Item } from './item.hmws';
 import { browser } from 'protractor';
 import { ItemHelpers } from '../helpers/test-helpers';
-import { Item } from './item.hmws';
 
 export namespace HMWSItems{
+    export class Company extends Item{
+        name: string;
+        longName: string;
+        ABN: string;
+
+        constructor() {
+            const formFields: FormField[] = [
+                {ID: 'Name',        field: 'input', key: 'name'},
+                {ID: 'LongName',    field: 'input', key: 'longName'},
+                {ID: 'ABN',         field: 'input', key: 'ABN'},
+            ];
+
+            const itemList = new ItemList({
+                columns: ['Name', 'Long Name', 'ABN', 'Phone', 'Email', 'State'],
+                orderBy: ['NAME', 'ASC'],
+                selector: TableSelector.RADIOBUTTON
+            });
+
+            const itemDetails = new ItemDetails({
+                outcome: {
+                    Name: Outcome.FIELD,
+                    'Long Name': Outcome.FIELD,
+                    ABN: Outcome.FIELD,
+                    Phone: Outcome.TABLE,
+                    Email: Outcome.TABLE
+                }
+            });
+
+            super(
+                'hmws/companies',
+                'name',
+                'Company',
+                'Companies',
+                formFields,
+                {
+                    itemList: itemList,
+                    itemDetails: itemDetails
+                }
+            );
+        }
+
+        initializeTestData(index?: number): { item: Company; index: number; } {
+            const companies = <Company[]>[
+                {name: 'EC', longName: 'Evil Corp', ABN: 'ABN'},
+                {name: 'V2', longName: 'Vaklang 2woh', ABN: 'ABN'}
+            ];
+
+            const num = index ? index : ItemHelpers.randomWholeNumber(0, companies.length-1);
+            const test = companies[num]
+            Object.keys(test).forEach(key =>{
+                this[key] = test[key];
+            });
+            return {item: this, index: num};
+        }
+
+        getUrl(): string {
+            return `${browser.baseUrl}/#/${this.domain}/${encodeURI(this.name)}`;
+        }
+
+        getUrlIdentifier(): string {
+            return this.domainIdentifer;
+        }
+    }
+
     export class Skill extends Item {
         name: string;
         description: string;
@@ -14,7 +82,30 @@ export namespace HMWSItems{
                 {ID: 'Description', field: 'input', key: 'description'}
             ];
 
-            super('hmws/skills',formFields);
+            const itemList = new ItemList({
+                columns: ['Name', 'Description', 'State'],
+                orderBy: ['NAME', 'ASC'],
+                selector: TableSelector.RADIOBUTTON
+            });
+
+            const itemDetails = new ItemDetails({
+                outcome: {
+                    Name: Outcome.FIELD,
+                    Description: Outcome.FIELD,
+                }
+            });
+
+            super(
+                'hmws/skills',
+                'name',
+                'Skill',
+                'Skills',
+                formFields,
+                {
+                    itemList: itemList,
+                    itemDetails: itemDetails
+                }
+            );
         }
 
         initializeTestData(index?: number): { item: Skill; index: number; } {
@@ -23,7 +114,7 @@ export namespace HMWSItems{
                 {name: 'Walk', description: 'Walk like a human'}
             ];
 
-            const num = index | ItemHelpers.randomWholeNumber(0,skills.length-1);
+            const num = index ? index : ItemHelpers.randomWholeNumber(0,skills.length-1);
             const test = skills[num]
             Object.keys(test).forEach(key =>{
                 this[key] = test[key];
@@ -31,10 +122,12 @@ export namespace HMWSItems{
             return {item: this, index: num};
         }
 
-
-
         getUrl(): string{
-            return `${browser.baseUrl}/#/${this.itemDomain}/${encodeURI(this.name)}`
+            return `${browser.baseUrl}/#/${this.domain}/${encodeURI(this.name)}`
+        }
+
+        getUrlIdentifier(): string {
+            return this.domainIdentifer;
         }
     }
 
@@ -50,7 +143,31 @@ export namespace HMWSItems{
                 {ID: 'SerialNumber', field: 'input', key: 'serialNumber'}
             ];
 
-            super('hmws/machines',formFields);
+            const itemList = new ItemList({
+                columns: ['Name', 'Model', 'Serial Number', 'State'],
+                orderBy: ['NAME', 'ASC'],
+                selector: TableSelector.RADIOBUTTON
+            });
+
+            const itemDetails = new ItemDetails({
+                outcome: {
+                    Name: Outcome.FIELD,
+                    Model: Outcome.FIELD,
+                    'Serial Number': Outcome.FIELD,
+                }
+            });
+
+            super(
+                'hmws/machines',
+                'name',
+                'Machine',
+                'Machines',
+                formFields,
+                {
+                    itemList: itemList,
+                    itemDetails: itemDetails
+                }
+            );
         }
 
         initializeTestData(index?: number): { item: Machine; index: number; } {
@@ -59,7 +176,7 @@ export namespace HMWSItems{
                 {name: 'Washing Machine', model: 'WASHMAN321', serialNumber: '123NAMHSAW'}
             ];
 
-            const num = index | ItemHelpers.randomWholeNumber(0,machines.length-1);
+            const num = index ? index : ItemHelpers.randomWholeNumber(0,machines.length-1);
             const test = machines[num]
             Object.keys(test).forEach(key =>{
                 this[key] = test[key];
@@ -68,8 +185,11 @@ export namespace HMWSItems{
         }
 
         getUrl(): string{
-            return `${browser.baseUrl}/#/${this.itemDomain}/${encodeURI(this.name)}`
+            return `${browser.baseUrl}/#/${this.domain}/${encodeURI(this.name)}`
+        }
+
+        getUrlIdentifier(): string {
+            return this.domainIdentifer;
         }
     }
-
 }

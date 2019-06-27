@@ -1,11 +1,26 @@
+export enum TableSelector {
+    ROW = 'Row',
+    RADIOBUTTON = 'Radio Button'
+}
+
 export class ItemList {
     columns: Array<String>;
+    orderBy: Array<String>
     selectedColumns: Array<String>;
-    filters: object;
+    selector: string;
+    pageRows: number;
 
-    constructor(columns: Array<String>, selectedColumns: Array<String>, filters: object) {
-        this.columns = columns;
-        this.selectedColumns = selectedColumns;
-        this.filters = filters;
+    constructor(params: {
+            columns: Array<String>, 
+            orderBy: Array<String>,
+            selector: TableSelector;
+            selectedColumns?: Array<String>, 
+            filters?: object,
+        }) {
+        this.columns = params.columns;
+        this.orderBy = params.orderBy
+        this.selector = params.selector;
+        this.pageRows = 40;
+        this.selectedColumns = params.selectedColumns;
     }
 }

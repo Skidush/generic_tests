@@ -1,6 +1,5 @@
 // Protractor configuration file, see link for more information
 // https://github.com/angular/protractor/blob/master/lib/config.ts
-const testToRun = '@SkillCreate'
 exports.config = {
   allScriptsTimeout: 11000,
   capabilities: {
@@ -17,7 +16,10 @@ exports.config = {
 
   specs: [
     './e2e/features/Login.feature',
-    './e2e/features/*/GenericCreate.feature'
+    './e2e/features/*/GenericCreate.feature',
+    './e2e/features/*/GenericRead.feature',
+    './e2e/features/*/GenericEdit.feature',
+    './e2e/features/*/GenericDelete.feature',
   ],
   framework:'custom',
   frameworkPath: require.resolve('protractor-cucumber-framework'),
@@ -37,13 +39,9 @@ exports.config = {
   },
 
   params: {
-    createdItemDetails: {},
-    editedItemDetails: {},
-    finalizedItemDetails: {},
-    selectedItemDetails: {},
-    selectedFilter: [],
+    itemDetails: {},
     root: process.cwd(),
-    defaultTimeout: 15000,
+    defaultTimer: 15000,
     project: 'hmws',
   },
 

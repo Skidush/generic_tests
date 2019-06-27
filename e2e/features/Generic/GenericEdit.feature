@@ -6,11 +6,21 @@ Feature: Edit an Item
     @GenericEdit
     Scenario Outline: Edit an item
         Given I have an existing <itemType>
-            And I am on the item list of <itemTypes>
-        When I "create" an <itemType> item
-        Then I should see the "edited" details of <itemType>
-
-    @SkillsCRUD @SkillEdit
+            And I am on <itemUrl>
+        When I "edit" a/an <itemType> item
+        Then I should "see" the details of the <itemType> in the table
+        
+    @SkillCRUD @SkillEdit
     Scenarios:
-        | url              | itemType | itemTypes |
-        | "/#/hmws/skills" | "Skill"  | "Skills"  |
+        | itemUrl          | itemType |
+        | "/#/hmws/skills" | "Skill"  |
+
+    @MachineCRUD @MachineEdit
+    Scenarios:
+        | itemUrl            | itemType    |
+        | "/#/hmws/machines" | "Machine"  |
+
+    @CompanyCRUD @CompanyEdit
+    Scenarios:
+        | itemUrl             | itemType     |
+        | "/#/hmws/companies" | "Company"    |

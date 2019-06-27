@@ -1,15 +1,39 @@
 import { FormField } from './itemForm.hmws';
+import { ItemList } from './itemList.hmws';
+import { ItemDetails } from './itemDetails.hmws';
+import { HMWSItems } from './items.hmws';
 
 export abstract class Item {
-    readonly itemDomain: string;
-    formFields: FormField[];
-    private _currentTestIndex: number;
+    readonly domain: string;
+    readonly domainIdentifer: string;
+    readonly pluralName: string;
+    readonly singularName: string;
 
-    constructor(itemDomain: string, formFields: FormField[]){
-        this.itemDomain = this.getStandardDomain(itemDomain);
+    list: ItemList;
+    details: ItemDetails;
+    // toolbar: ItemToolbar;
+    formFields: FormField[];
+
+    private _currentTestIndex: number;
+    constructor(domain: string, domainIdentifier: string, singularName:string, pluralName: string, formFields: FormField[],
+        optional?: {
+            itemList?: ItemList,
+            itemDetails?: ItemDetails
+        }){
+        this.domain = this.getStandardDomain(domain);
+        this.domainIdentifer = domainIdentifier;
         this.formFields = formFields;
+        this.pluralName = pluralName;
+        this.singularName = singularName;
+
+        if (optional) {
+            this.list = optional.itemList;
+            this.details = optional.itemDetails;
+        }
+        ItemRegistrar.register(this);
     }
 
+    abstract getUrlIdentifier(): string;
     abstract initializeTestData(index?: number): {item: Item, index:number};
     abstract getUrl(): string;
 
@@ -48,11 +72,43 @@ export abstract class Item {
             if(index === 0){
                 result = part;
             }
-            else{
+            else {
                 result += `/${part}`
             }
         });
         return result;
     }
+}
 
+export interface ItemEntry{
+    className: string;
+    singularName: string;
+    pluralName: string;
+}
+
+export class ItemRegistrar {
+    private static items: Set<ItemEntry> = new Set<ItemEntry>();
+
+    static register(item: Item){
+        this.items.add({
+            className: item.constructor.name,
+            singularName: item.singularName,
+            pluralName: item.pluralName
+        })
+    }
+
+    static findClass(name: string): string{
+        for(let entry of ItemRegistrar.items){
+            if(entry.className === name){
+                return entry.className;
+            }
+            else if(entry.singularName === name){
+                return entry.className;
+            }
+            else if(entry.pluralName === name){
+                return entry.className;
+            }
+        }
+        return undefined;
+    }
 }
