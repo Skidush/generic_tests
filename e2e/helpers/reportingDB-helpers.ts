@@ -4,8 +4,8 @@ import { ItemHelpers } from "./test-helpers";
 const pg: pgConnection = new pgConnection();
 
 export class ReportingDB {
-  static async getItems(itemType: string, orderBy?: string, limit?: number) {
-    orderBy = orderBy ? `ORDER BY "${orderBy[0].toUpperCase()}" ${orderBy[1]}` : '';
+  static async getItems(itemType: string, orderBy?: Array<String>, limit?: number) {
+    (orderBy as any) = orderBy ? `ORDER BY "${orderBy[0].toUpperCase()}" ${orderBy[1]}` : '';
     itemType = ItemHelpers.toUpperCaseTrimmed(itemType);
 
     let query = `SELECT * FROM public."${itemType}" ${orderBy}`;
@@ -18,14 +18,22 @@ export class ReportingDB {
 
   static async getItem(itemType: string, columns?: Array<String>, filters?: Array<String>, orderBy?: Array<String>, limit?: number) {
     itemType = ItemHelpers.toUpperCaseTrimmed(itemType);
-    (columns as any) = columns ? `"${columns.join('", "').toUpperCase().replace(/\s+/g, "")}"` : '*';
+
+    let columnString = '*';
+    let orderByString = '';
+    
+    if (columns) {
+      columnString = ItemHelpers.toUpperCaseTrimmed(`${columns.join('", "')}`);
+    }
+
+    if (orderBy) {
+      orderByString = `ORDER BY "${orderBy[0]}" ${orderBy[1]}`;
+    }
 
     const filter = filters ? `WHERE ${filters.join(' AND ')}` : '';
-
-    (orderBy as any) = orderBy ? `ORDER BY "${orderBy[0].toUpperCase()}" ${orderBy[1]}`: '';
     (limit as any) = limit ? `LIMIT ${limit}` : ''; 
 
-    const query = `SELECT ${columns} FROM public."${itemType}" ${filter} ${orderBy} ${limit}`;
+    const query = `SELECT "${columnString}" FROM public."${itemType}" ${filter} ${orderByString} ${limit}`;
     const results = await pg.query(query);
 
     return results.rows;
@@ -34,27 +42,18 @@ export class ReportingDB {
   static async getItemIDs(itemType: string, createdItemDetails: any) {
     itemType = ItemHelpers.toUpperCaseTrimmed(itemType);
     const itemColumns = await ReportingDB.getTableColumns(itemType);
-    let ID;
+    let IDs = "UUID";
     let querySelectors = [];
 
     Object.keys(createdItemDetails).forEach(key => {
-      querySelectors.push(
-        '"' +
-          ItemHelpers.toUpperCaseTrimmed(key) +
-          "\" = '" +
-          createdItemDetails[key] +
-          "'"
-      );
+      querySelectors.push(`"${ItemHelpers.toUpperCaseTrimmed(key)}" = '${createdItemDetails[key]};`);
     });
 
-    ID = itemColumns.indexOf('ID');
-    ID = ID > 0 ? + ', "ID"' : '';
+    if (itemColumns.indexOf('ID')) {
+      IDs.concat(', "ID"');
+    }
 
-    const query =
-      'SELECT "UUID"' + ID + ' FROM public."' +
-      itemType +
-      '" WHERE ' +
-      querySelectors.join(" AND ");
+    const query = `SELECT ${IDs} FROM public."${itemType}" WHERE ${querySelectors.join(" AND ")}`;
     const results = await pg.query(query);
     return results.rows[0];
   }

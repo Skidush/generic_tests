@@ -1,4 +1,4 @@
-export enum outcome {
+export enum Outcome {
     FIELD = 'FIELD',
     UNIT = 'UNIT',
     TUPLE = 'TUPLE',
@@ -8,10 +8,10 @@ export enum outcome {
 }
 
 export class ItemDetails {
-    outcome: { [s: string]: outcome };
+    outcome: { [s: string]: Outcome };
 
     constructor(params: {
-        outcome: { [s: string]: outcome }
+        outcome: { [s: string]: Outcome }
     }) {
         this.outcome = params.outcome;
     }

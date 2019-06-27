@@ -1,4 +1,4 @@
-export enum tableSelector {
+export enum TableSelector {
     ROW = 'Row',
     RADIOBUTTON = 'Radio Button'
 }
@@ -13,7 +13,7 @@ export class ItemList {
     constructor(params: {
             columns: Array<String>, 
             orderBy: Array<String>,
-            selector: tableSelector;
+            selector: TableSelector;
             selectedColumns?: Array<String>, 
             filters?: object,
         }) {

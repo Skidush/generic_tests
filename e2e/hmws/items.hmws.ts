@@ -1,6 +1,6 @@
 
-import { ItemList, tableSelector } from './itemList.hmws';
-import { ItemDetails, outcome } from './itemDetails.hmws';
+import { ItemList, TableSelector } from './itemList.hmws';
+import { ItemDetails, Outcome } from './itemDetails.hmws';
 import { ItemToolbar } from './itemToolbar.hmws'
 import { ItemForm, FormField } from './itemForm.hmws';
 import { Item } from './item.hmws';
@@ -23,16 +23,16 @@ export namespace HMWSItems{
             const itemList = new ItemList({
                 columns: ['Name', 'Long Name', 'ABN', 'Phone', 'Email', 'State'],
                 orderBy: ['NAME', 'ASC'],
-                selector: tableSelector.RADIOBUTTON
+                selector: TableSelector.RADIOBUTTON
             });
 
             const itemDetails = new ItemDetails({
                 outcome: {
-                    Name: outcome.FIELD,
-                    'Long Name': outcome.FIELD,
-                    ABN: outcome.FIELD,
-                    Phone: outcome.TABLE,
-                    Email: outcome.TABLE
+                    Name: Outcome.FIELD,
+                    'Long Name': Outcome.FIELD,
+                    ABN: Outcome.FIELD,
+                    Phone: Outcome.TABLE,
+                    Email: Outcome.TABLE
                 }
             });
 
@@ -85,13 +85,13 @@ export namespace HMWSItems{
             const itemList = new ItemList({
                 columns: ['Name', 'Description', 'State'],
                 orderBy: ['NAME', 'ASC'],
-                selector: tableSelector.RADIOBUTTON
+                selector: TableSelector.RADIOBUTTON
             });
 
             const itemDetails = new ItemDetails({
                 outcome: {
-                    Name: outcome.FIELD,
-                    Description: outcome.FIELD,
+                    Name: Outcome.FIELD,
+                    Description: Outcome.FIELD,
                 }
             });
 
@@ -105,7 +105,7 @@ export namespace HMWSItems{
                     itemList: itemList,
                     itemDetails: itemDetails
                 }
-                );
+            );
         }
 
         initializeTestData(index?: number): { item: Skill; index: number; } {
@@ -146,14 +146,14 @@ export namespace HMWSItems{
             const itemList = new ItemList({
                 columns: ['Name', 'Model', 'Serial Number', 'State'],
                 orderBy: ['NAME', 'ASC'],
-                selector: tableSelector.RADIOBUTTON
+                selector: TableSelector.RADIOBUTTON
             });
 
             const itemDetails = new ItemDetails({
                 outcome: {
-                    Name: outcome.FIELD,
-                    Model: outcome.FIELD,
-                    'Serial Number': outcome.FIELD,
+                    Name: Outcome.FIELD,
+                    Model: Outcome.FIELD,
+                    'Serial Number': Outcome.FIELD,
                 }
             });
 
