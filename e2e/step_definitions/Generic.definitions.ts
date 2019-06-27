@@ -175,7 +175,9 @@ When('I {string} a\\/an {string} item', async function (action: 'create' | 'edit
         const tableRowData = await tableRow.getText();
 
         // Some tables (e.g Machine item list) show the rows while its still loading
+        // TODO:TOFIX
         await ElementIs.stale(element(by.className('ui-table-loading')));
+        await browser.sleep(1500);  
 
         if (item.list.selector === TableSelector.ROW) {
           await tableRow.click();
@@ -267,7 +269,12 @@ Then("I should {string} the details of the {string} in the table", async functio
     const deletedData: any = browser.params.itemDetails[itemType]['deletedData'];
     expect(itemListData).to.not.include(deletedData);
   } else if (currentAction === 'edit' && view === 'see') {
-    expectedData.push(Object.values(browser.params.itemDetails[itemType]['inputtedData']).join(' ').concat(' ACTIVE'));
+    const item = new HMWSItems[`${itemType}`]();
+    item.initializeTestData(browser.params.itemDetails[itemType]['currentTestIndex']);
+
+    filters = [`"NAME" = '${item.name}'`];
+    const itemData = await ReportingDB.getItem(itemType, item.list.columns, filters);
+    expectedData.push(Object.values(itemData[0]).filter(res => res !== null).join(' '));
     expect(itemListData).to.include(expectedData[0]);
   } else {
     // Parse the data from Reporting DB to match the format of the data extracted from the table
